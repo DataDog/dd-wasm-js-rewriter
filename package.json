@@ -9,7 +9,7 @@
     "type": "git",
     "url": "git+https://github.com/DataDog/dd-wasm-js-rewriter.git"
   },
-  "keywords": ["datadog", "iast"],
+  "keywords": ["datadog", "rewriter"],
   "author": "Datadog Inc. <info@datadoghq.com>",
   "license": "Apache-2.0",
   "bugs": {
