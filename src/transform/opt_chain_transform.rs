@@ -6,7 +6,6 @@ use crate::visitor::{
     csi_methods::CsiMethods,
     ident_provider::{IdentKind, IdentProvider},
 };
-use swc::atoms::JsWord;
 use swc_common::{util::take::Take, SyntaxContext, DUMMY_SP};
 use swc_ecma_ast::*;
 use swc_ecma_visit::{Visit, VisitMut, VisitMutWith};
@@ -276,7 +275,7 @@ impl OptChainTransform {
 
         let cons = Ident {
             span: DUMMY_SP,
-            sym: JsWord::from("undefined"),
+            sym: "undefined".into(),
             optional: false,
             ctxt: SyntaxContext::empty(),
         };

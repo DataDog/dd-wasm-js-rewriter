@@ -3,7 +3,6 @@
  * This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2022 Datadog, Inc.
  **/
 use std::collections::HashSet;
-use swc::atoms::JsWord;
 use swc_common::{Span, SyntaxContext, DUMMY_SP};
 use swc_ecma_ast::{
     ArrayLit, AssignExpr, AssignOp, AssignTarget, BindingIdent, Expr, ExprOrSpread, Ident,
@@ -71,10 +70,10 @@ pub trait IdentProvider {
     ) -> (AssignExpr, Ident) {
         let id = Ident {
             span: DUMMY_SP,
-            sym: JsWord::from(get_dd_local_variable_name(
+            sym: get_dd_local_variable_name(
                 index,
                 &self.get_local_var_prefix(),
-            )),
+            ).into(),
             optional: false,
             ctxt: SyntaxContext::empty(),
         };
