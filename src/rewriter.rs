@@ -6,8 +6,8 @@ use crate::{
     telemetry::TelemetryVerbosity,
     transform::transform_status::{Status, TransformStatus},
     util::{file_name, parse_source_map, FileReader},
-    visitor::{
-        block_transform_visitor::BlockTransformVisitor,
+    visitor::iast::{
+        taint_block_transform_visitor::TaintBlockTransformVisitor,
         csi_methods::CsiMethods,
         literal_visitor::{get_literals, LiteralsResult},
     },
@@ -61,6 +61,7 @@ pub struct Config {
     pub csi_methods: CsiMethods,
     pub verbosity: TelemetryVerbosity,
     pub literals: bool,
+    pub errortracking: bool,
     pub file_prefix_code: Vec<Stmt>,
 }
 
@@ -73,6 +74,7 @@ impl fmt::Debug for Config {
             .field("csi_methods", &self.csi_methods)
             .field("verbosity", &self.verbosity)
             .field("literals", &self.literals)
+            .field("errortracking", &self.errortracking)
             // file_prefix_code intentionally ignored
             .finish()
     }
@@ -94,8 +96,10 @@ pub fn rewrite_js<R: Read>(
             .cm
             .new_source_file(Arc::new(FileName::Real(PathBuf::from(file))), code);
 
+
         parse_js(&source_file, handler, &compiler)
-            .and_then(|program| transform_js(program, file, file_reader, config, &compiler))
+            .and_then(|program| apply_transformation_passes(program, file, config))
+            .and_then(|(program, transform_status)| generate_output(program, transform_status, file, file_reader, config, &compiler))
     })
 }
 
@@ -171,18 +175,60 @@ fn parse_js(
     )
 }
 
-fn transform_js<R: Read>(
+fn apply_transformation_passes(
     mut program: Program,
+    file: &str,
+    config: &Config
+) -> Result<(Program, TransformStatus), Error >{
+    let passes: [fn(&mut Program, &mut TransformStatus, &Config); 2] = [transform_iast, transform_errortracking];
+    let mut transform_status = TransformStatus::not_modified(config);
+    for pass in passes.iter() {
+        pass(&mut program, &mut transform_status, config);
+        if transform_status.status == Status::Cancelled {
+            return Err(Error::msg(format!(
+                "Cancelling {} file rewrite. Reason: {}",
+                file,
+                transform_status
+                    .msg
+                    .unwrap_or_else(|| "unknown".to_string())
+            )))
+        }
+    }
+    Ok((program, transform_status))
+}
+
+fn transform_iast(
+    program: &mut Program,
+    transform_status: &mut TransformStatus,
+    config: &Config
+) {
+    if config.csi_methods.methods.len() == 0 {
+        return;
+    }
+    let mut block_transform_visitor = TaintBlockTransformVisitor::default(transform_status, config);
+    program.visit_mut_with(&mut block_transform_visitor);
+}
+
+fn transform_errortracking(
+    _: &mut Program,
+    _: &mut TransformStatus,
+    config: &Config
+) {
+    if config.errortracking == false {
+        return;
+    }
+    // let mut block_transform_visitor = BlockTransformVisitor::default(transform_status, config);
+    // program.visit_mut_with(&mut block_transform_visitor);
+}
+
+fn generate_output<R: Read>(
+    mut program: Program,
+    transform_status: TransformStatus,
     file: &str,
     file_reader: &impl FileReader<R>,
     config: &Config,
     compiler: &Compiler,
 ) -> Result<RewrittenOutput, Error> {
-    let mut transform_status = TransformStatus::not_modified(config);
-
-    let mut block_transform_visitor = BlockTransformVisitor::default(&mut transform_status, config);
-    program.visit_mut_with(&mut block_transform_visitor);
-
     let literals_result = get_literals(config.literals, file, &mut program, compiler);
     let comments = &compiler.comments().clone() as &dyn Comments;
 
@@ -196,39 +242,31 @@ fn transform_js<R: Read>(
 
     match transform_status.status {
         Status::Modified => {
-            // extract sourcemap before printing otherwise comments are consumed
-            // and looks like it is not possible to read them after compiler.print() invocation
-            let original_source_map = extract_source_map(file, compiler.comments(), file_reader);
+                        // extract sourcemap before printing otherwise comments are consumed
+                        // and looks like it is not possible to read them after compiler.print() invocation
+                        let original_source_map = extract_source_map(file, compiler.comments(), file_reader);
 
-            compiler
-                .print(&program, print_args)
-                .map(|output| RewrittenOutput {
-                    code: output.code,
-                    source_map: output.map.unwrap_or_default(),
-                    original_source_map,
-                    transform_status: Some(transform_status),
-                    literals_result,
-                })
+                        compiler
+                            .print(&program, print_args)
+                            .map(|output| RewrittenOutput {
+                                code: output.code,
+                                source_map: output.map.unwrap_or_default(),
+                                original_source_map,
+                                transform_status: Some(transform_status),
+                                literals_result,
+                            })
         }
-
         Status::NotModified => Ok(RewrittenOutput {
-            code: String::default(),
-            source_map: String::default(),
-            original_source_map: OriginalSourceMap {
-                source: None,
-                source_map_comment: None,
-            },
-            transform_status: Some(transform_status),
-            literals_result,
-        }),
-
-        Status::Cancelled => Err(Error::msg(format!(
-            "Cancelling {} file rewrite. Reason: {}",
-            file,
-            transform_status
-                .msg
-                .unwrap_or_else(|| "unknown".to_string())
-        ))),
+                code: String::default(),
+                source_map: String::default(),
+                original_source_map: OriginalSourceMap {
+                    source: None,
+                    source_map_comment: None,
+                },
+                transform_status: Some(transform_status),
+                literals_result,
+            }),
+        Status::Cancelled => Err(Error::msg("cannot happen")),
     }
 }
 

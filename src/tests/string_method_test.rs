@@ -12,7 +12,7 @@ mod tests {
             assert_not_modified, csi_from_str, get_chained_and_print_comments_config,
             get_default_config, rewrite_js, rewrite_js_with_csi_methods,
         },
-        visitor::csi_methods::CsiMethods,
+        visitor::iast::csi_methods::CsiMethods,
     };
     use speculoos::{assert_that, string::StrAssertions};
 

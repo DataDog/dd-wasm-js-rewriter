@@ -7,22 +7,22 @@ use swc_common::SyntaxContext;
 use swc_ecma_ast::*;
 
 use crate::{
-    transform::{
+    transform::iast::{
         function_prototype_transform::FunctionPrototypeTransform,
         operand_handler::{DefaultOperandHandler, OperandHandler},
     },
-    visitor::{
+    visitor::iast::{
         csi_methods::CsiMethods,
         ident_provider::{IdentKind, IdentProvider},
     },
 };
 
-use crate::visitor::visitor_util::get_dd_paren_expr;
-
-use super::{
-    operand_handler::{ExpandArrays, IdentMode},
-    transform_status::TransformResult,
+use crate::{
+    visitor::visitor_utils::get_dd_paren_expr,
+    transform::transform_status::TransformResult
 };
+
+use super::operand_handler::{ExpandArrays, IdentMode};
 
 pub struct ResultExpr {
     pub expr: Expr,

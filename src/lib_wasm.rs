@@ -10,7 +10,10 @@ use crate::{
     tracer_logger::{self},
     transform::transform_status::TransformStatus,
     util::{rnd_string, FileReader},
-    visitor::{self, csi_methods::CsiMethods, literal_visitor::LiteralsResult},
+    visitor::{self, iast::{
+        csi_methods::CsiMethods,
+        literal_visitor::LiteralsResult
+    }},
 };
 use log::{debug, error};
 use serde::{Deserialize, Serialize};
@@ -39,6 +42,7 @@ pub struct RewriterConfig {
     pub csi_methods: Option<Vec<CsiMethod>>,
     pub telemetry_verbosity: Option<String>,
     pub literals: Option<bool>,
+    pub errortracking: Option<bool>,
 }
 
 #[derive(Serialize)]
@@ -67,6 +71,7 @@ impl RewriterConfig {
             csi_methods: None,
             telemetry_verbosity: Some("INFORMATION".to_string()),
             literals: Some(true),
+            errortracking: Some(false)
         }
     }
 
@@ -76,14 +81,14 @@ impl RewriterConfig {
                 &methods
                     .iter()
                     .map(|m| {
-                        visitor::csi_methods::CsiMethod::new(
+                        visitor::iast::csi_methods::CsiMethod::new(
                             m.src.clone(),
                             m.dst.clone(),
                             m.operator.unwrap_or(false),
                             m.allowed_without_callee.unwrap_or(false),
                         )
                     })
-                    .collect::<Vec<visitor::csi_methods::CsiMethod>>(),
+                    .collect::<Vec<visitor::iast::csi_methods::CsiMethod>>(),
             ),
 
             None => CsiMethods::empty(),
@@ -104,6 +109,7 @@ impl RewriterConfig {
             csi_methods,
             verbosity: TelemetryVerbosity::parse(self.telemetry_verbosity.clone()),
             literals: self.literals.unwrap_or(true),
+            errortracking: self.errortracking.unwrap_or(false),
             file_prefix_code,
         }
     }

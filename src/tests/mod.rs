@@ -7,7 +7,7 @@ use crate::{
     telemetry::TelemetryVerbosity,
     transform::transform_status::Status,
     util::DefaultFileReader,
-    visitor::csi_methods::{CsiMethod, CsiMethods},
+    visitor::iast::csi_methods::{CsiMethod, CsiMethods},
 };
 use anyhow::Error;
 use speculoos::{assert_that, prelude::BooleanAssertions};
@@ -64,6 +64,7 @@ fn rewrite_js_with_csi_methods(
             verbosity: TelemetryVerbosity::Information,
             literals: false,
             file_prefix_code: Vec::new(),
+            errortracking: false,
         },
         &source_map_reader,
     )
@@ -105,6 +106,7 @@ fn get_default_config_with_verbosity(
         verbosity,
         literals: false,
         file_prefix_code: Vec::new(),
+        errortracking: false
     }
 }
 
@@ -117,6 +119,7 @@ fn get_chained_and_print_comments_config() -> Config {
         verbosity: TelemetryVerbosity::Debug,
         literals: false,
         file_prefix_code: Vec::new(),
+        errortracking: false,
     }
 }
 
@@ -129,6 +132,7 @@ fn get_literals_config() -> Config {
         verbosity: TelemetryVerbosity::Debug,
         literals: true,
         file_prefix_code: Vec::new(),
+        errortracking: false,
     }
 }
 
