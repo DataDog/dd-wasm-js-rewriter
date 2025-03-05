@@ -17,6 +17,7 @@ mod arrow_func_tests;
 mod binary_assignation_test;
 mod binary_expression_test;
 mod literal_test;
+mod orchestrion_test;
 mod source_map_test;
 mod string_method_test;
 mod telemetry_test;
@@ -30,7 +31,14 @@ fn get_test_resources_folder() -> Result<PathBuf, String> {
 
 fn rewrite_js(code: String, file: String) -> Result<RewrittenOutput, Error> {
     let source_map_reader = DefaultFileReader {};
-    crate::rewriter::rewrite_js(code, &file, &get_default_config(false), &source_map_reader)
+    crate::rewriter::rewrite_js(
+        code,
+        &file,
+        &mut get_default_config(false),
+        &source_map_reader,
+        None,
+        None,
+    )
 }
 
 fn rewrite_js_with_telemetry_verbosity(
@@ -42,8 +50,10 @@ fn rewrite_js_with_telemetry_verbosity(
     crate::rewriter::rewrite_js(
         code,
         &file,
-        &get_default_config_with_verbosity(false, verbosity),
+        &mut get_default_config_with_verbosity(false, verbosity),
         &source_map_reader,
+        None,
+        None,
     )
 }
 
@@ -56,7 +66,7 @@ fn rewrite_js_with_csi_methods(
     crate::rewriter::rewrite_js(
         code,
         &file,
-        &Config {
+        &mut Config {
             chain_source_map: false,
             print_comments: false,
             local_var_prefix: "test".to_string(),
@@ -64,14 +74,18 @@ fn rewrite_js_with_csi_methods(
             verbosity: TelemetryVerbosity::Information,
             literals: false,
             file_prefix_code: Vec::new(),
+            iast_enabled: true,
+            instrumentor: None,
         },
         &source_map_reader,
+        None,
+        None,
     )
 }
 
-fn rewrite_js_with_config(code: String, config: &Config) -> Result<RewrittenOutput, Error> {
+fn rewrite_js_with_config(code: String, config: &mut Config) -> Result<RewrittenOutput, Error> {
     let source_map_reader = DefaultFileReader {};
-    crate::rewriter::rewrite_js(code, "test.js", config, &source_map_reader)
+    crate::rewriter::rewrite_js(code, "test.js", config, &source_map_reader, None, None)
 }
 
 fn get_default_csi_methods() -> CsiMethods {
@@ -105,6 +119,8 @@ fn get_default_config_with_verbosity(
         verbosity,
         literals: false,
         file_prefix_code: Vec::new(),
+        iast_enabled: true,
+        instrumentor: None,
     }
 }
 
@@ -117,6 +133,8 @@ fn get_chained_and_print_comments_config() -> Config {
         verbosity: TelemetryVerbosity::Debug,
         literals: false,
         file_prefix_code: Vec::new(),
+        iast_enabled: true,
+        instrumentor: None,
     }
 }
 
@@ -129,6 +147,8 @@ fn get_literals_config() -> Config {
         verbosity: TelemetryVerbosity::Debug,
         literals: true,
         file_prefix_code: Vec::new(),
+        iast_enabled: true,
+        instrumentor: None,
     }
 }
 

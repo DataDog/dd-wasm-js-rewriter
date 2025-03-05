@@ -39,6 +39,8 @@ pub struct RewriterConfig {
     pub csi_methods: Option<Vec<CsiMethod>>,
     pub telemetry_verbosity: Option<String>,
     pub literals: Option<bool>,
+    pub iast_enabled: Option<bool>,
+    pub orchestrion: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -67,6 +69,8 @@ impl RewriterConfig {
             csi_methods: None,
             telemetry_verbosity: Some("INFORMATION".to_string()),
             literals: Some(true),
+            iast_enabled: Some(true),
+            orchestrion: None,
         }
     }
 
@@ -105,6 +109,11 @@ impl RewriterConfig {
             verbosity: TelemetryVerbosity::parse(self.telemetry_verbosity.clone()),
             literals: self.literals.unwrap_or(true),
             file_prefix_code,
+            iast_enabled: self.iast_enabled.unwrap_or(true),
+            instrumentor: {
+                let orchestrion = self.orchestrion.clone();
+                orchestrion.map(|config_str| config_str.parse().unwrap())
+            },
         }
     }
 }
@@ -179,33 +188,46 @@ impl Rewriter {
     }
 
     #[wasm_bindgen]
-    pub fn rewrite(&mut self, code: String, file: String) -> anyhow::Result<JsValue, JsError> {
+    pub fn rewrite(
+        &mut self,
+        code: String,
+        file: String,
+        module_name: Option<String>,
+        module_version: Option<String>,
+    ) -> anyhow::Result<JsValue, JsError> {
         let source_map_reader = WasmFileReader {};
 
-        rewrite_js(code, &file, &self.config, &source_map_reader)
-            .map(|result| Result {
-                content: print_js(
-                    &result.code,
-                    &result.source_map,
-                    &result.original_source_map,
-                    &self.config,
-                )
-                .into_owned(),
-                metrics: get_metrics(result.transform_status, &file),
-                literals_result: result.literals_result,
-            })
-            .as_ref()
-            .map(|result| {
-                let status = &result.metrics;
-                debug!("Rewritten {file}\n status {status:?}");
+        rewrite_js(
+            code,
+            &file,
+            &mut self.config,
+            &source_map_reader,
+            module_name,
+            module_version,
+        )
+        .map(|result| Result {
+            content: print_js(
+                &result.code,
+                &result.source_map,
+                &result.original_source_map,
+                &self.config,
+            )
+            .into_owned(),
+            metrics: get_metrics(result.transform_status, &file),
+            literals_result: result.literals_result,
+        })
+        .as_ref()
+        .map(|result| {
+            let status = &result.metrics;
+            debug!("Rewritten {file}\n status {status:?}");
 
-                serde_wasm_bindgen::to_value(result).unwrap()
-            })
-            .map_err(|e| {
-                let error_msg = format!("{e}");
-                error!("Error rewriting {}: {}", &file, &error_msg);
-                JsError::new(&error_msg)
-            })
+            serde_wasm_bindgen::to_value(result).unwrap()
+        })
+        .map_err(|e| {
+            let error_msg = format!("{e}");
+            error!("Error rewriting {}: {}", &file, &error_msg);
+            JsError::new(&error_msg)
+        })
     }
 
     #[wasm_bindgen(js_name = csiMethods)]

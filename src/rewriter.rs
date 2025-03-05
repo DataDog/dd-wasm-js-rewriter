@@ -35,6 +35,7 @@ use swc_common::{
 };
 use swc_ecma_ast::{EsVersion, Program, Stmt};
 
+use orchestrion_js::Instrumentor;
 use std::fmt;
 use swc_ecma_parser::{EsSyntax, Syntax};
 use swc_ecma_visit::VisitMutWith;
@@ -62,6 +63,8 @@ pub struct Config {
     pub verbosity: TelemetryVerbosity,
     pub literals: bool,
     pub file_prefix_code: Vec<Stmt>,
+    pub iast_enabled: bool,
+    pub instrumentor: Option<Instrumentor>,
 }
 
 impl fmt::Debug for Config {
@@ -81,8 +84,10 @@ impl fmt::Debug for Config {
 pub fn rewrite_js<R: Read>(
     code: String,
     file: &str,
-    config: &Config,
+    config: &mut Config,
     file_reader: &impl FileReader<R>,
+    module_name: Option<String>,
+    module_version: Option<String>,
 ) -> Result<RewrittenOutput> {
     debug!("Rewriting js file: {file} with config: {config:?}");
 
@@ -94,8 +99,17 @@ pub fn rewrite_js<R: Read>(
             .cm
             .new_source_file(Arc::new(FileName::Real(PathBuf::from(file))), code);
 
-        parse_js(&source_file, handler, &compiler)
-            .and_then(|program| transform_js(program, file, file_reader, config, &compiler))
+        parse_js(&source_file, handler, &compiler).and_then(|program| {
+            transform_js(
+                program,
+                file,
+                file_reader,
+                config,
+                &compiler,
+                module_name,
+                module_version,
+            )
+        })
     })
 }
 
@@ -175,13 +189,28 @@ fn transform_js<R: Read>(
     mut program: Program,
     file: &str,
     file_reader: &impl FileReader<R>,
-    config: &Config,
+    config: &mut Config,
     compiler: &Compiler,
+    module_name: Option<String>,
+    module_version: Option<String>,
 ) -> Result<RewrittenOutput, Error> {
     let mut transform_status = TransformStatus::not_modified(config);
 
-    let mut block_transform_visitor = BlockTransformVisitor::default(&mut transform_status, config);
-    program.visit_mut_with(&mut block_transform_visitor);
+    if config.iast_enabled {
+        let mut block_transform_visitor =
+            BlockTransformVisitor::default(&mut transform_status, config);
+        program.visit_mut_with(&mut block_transform_visitor);
+    }
+
+    if let Some(instrumentor) = &mut config.instrumentor {
+        if let (Some(name), Some(version)) = (module_name.as_deref(), module_version.as_deref()) {
+            let file_path = PathBuf::from(file);
+            let mut instrumentation_visitor =
+                instrumentor.get_matching_instrumentations(name, version, &file_path);
+            program.visit_mut_with(&mut instrumentation_visitor);
+            transform_status.status = Status::Modified;
+        }
+    }
 
     let literals_result = get_literals(config.literals, file, &mut program, compiler);
     let comments = &compiler.comments().clone() as &dyn Comments;

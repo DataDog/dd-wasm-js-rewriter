@@ -13,6 +13,8 @@ export interface RewriterConfig {
   localVarPrefix?: string
   csiMethods?: Array<CsiMethod>
   literals?: boolean
+  iastEnabled?: boolean
+  orchestrion?: string
 }
 export interface Result {
   content: string
