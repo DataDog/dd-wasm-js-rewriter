@@ -4,7 +4,6 @@ about: Create a report to help us improve
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
 <!--
@@ -15,9 +14,7 @@ see https://docs.datadoghq.com/tracing/troubleshooting/tracer_startup_logs/
 
 **Describe what happened:**
 
-
 **Describe what you expected:**
-
 
 **Steps to reproduce the issue:**
 
