@@ -82,7 +82,7 @@ impl VisitMut for TaintBlockTransformVisitor<'_> {
         node.visit_mut_children_with(self);
 
         if self.transform_status.status == Status::Modified {
-            insert_prefix_statement(node, &self.config);
+            insert_prefix_statement(node, self.config);
         }
     }
 }

@@ -195,7 +195,7 @@ fn transform_iast(
     transform_status: &mut TransformStatus,
     config: &Config
 ) {
-    if config.csi_methods.methods.len() == 0 {
+    if config.csi_methods.methods.is_empty() {
         return;
     }
     let mut block_transform_visitor = TaintBlockTransformVisitor::default(transform_status, config);
@@ -207,11 +207,9 @@ fn transform_errortracking(
     _: &mut TransformStatus,
     config: &Config
 ) {
-    if config.errortracking == false {
-        return;
+    if config.errortracking {
+        // do something
     }
-    // let mut block_transform_visitor = BlockTransformVisitor::default(transform_status, config);
-    // program.visit_mut_with(&mut block_transform_visitor);
 }
 
 fn generate_output<R: Read>(
