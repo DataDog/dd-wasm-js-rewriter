@@ -60,7 +60,7 @@ const rewriteWithOpts = (code, opts) => {
 
   const rewriter = opts.rewriter ?? new Rewriter(opts)
   const file = opts.file ?? path.join(process.cwd(), 'index.spec.js')
-  return rewriter.rewrite(code, file)
+  return rewriter.rewrite(code, file, ['iast'])
 }
 
 const rewriteAst = (code, opts) => {

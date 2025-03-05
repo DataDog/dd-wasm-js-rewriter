@@ -40,7 +40,7 @@ describe('main', () => {
     it('loads sourceMap when source file has been modified', () => {
       status = 'modified'
 
-      const response = rewriter.rewrite('content', 'file')
+      const response = rewriter.rewrite('content', 'file', ['iast'])
 
       expect(response.metrics.status).to.eq('modified')
       expect(cacheRewrittenSourceMap).to.be.calledOnceWith('file', 'content')
@@ -49,7 +49,7 @@ describe('main', () => {
     it('does not load sourceMap when source file has not been modified', () => {
       status = 'notmodified'
 
-      const response = rewriter.rewrite('content', 'file')
+      const response = rewriter.rewrite('content', 'file', ['iast'])
 
       expect(response.metrics.status).to.eq('notmodified')
       expect(cacheRewrittenSourceMap).to.not.be.called
@@ -60,7 +60,7 @@ describe('main', () => {
 
       cacheRewrittenSourceMap.throws(() => new Error('Error reading sourceMap file'))
 
-      expect(() => rewriter.rewrite('content', 'file')).to.not.throw()
+      expect(() => rewriter.rewrite('content', 'file', ['iast'])).to.not.throw()
     })
   })
 
@@ -72,7 +72,7 @@ describe('main', () => {
     it('does not load sourceMap when source file has been modified', () => {
       status = 'modified'
 
-      const response = rewriter.rewrite('content', 'file')
+      const response = rewriter.rewrite('content', 'file', ['iast'])
 
       expect(response.metrics.status).to.eq('modified')
       expect(cacheRewrittenSourceMap).to.not.be.called
@@ -81,7 +81,7 @@ describe('main', () => {
     it('does not load sourceMap when source file has not been modified', () => {
       status = 'notmodified'
 
-      const response = rewriter.rewrite('content', 'file')
+      const response = rewriter.rewrite('content', 'file', ['iast'])
 
       expect(response.metrics.status).to.eq('notmodified')
       expect(cacheRewrittenSourceMap).to.not.be.called
@@ -92,7 +92,7 @@ describe('main', () => {
 
       cacheRewrittenSourceMap.throws(() => new Error('Error reading sourceMap file'))
 
-      expect(() => rewriter.rewrite('content', 'file')).to.not.throw()
+      expect(() => rewriter.rewrite('content', 'file', ['iast'])).to.not.throw()
     })
   })
 })

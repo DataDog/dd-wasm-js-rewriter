@@ -6,11 +6,11 @@ use swc_ecma_ast::*;
 use swc_ecma_visit::VisitMutWith;
 
 use crate::{
-    transform::assign_add_transform::AssignOp::Assign,
-    visitor::operation_transform_visitor::OperationTransformVisitor,
+    transform::{iast::assign_add_transform::AssignOp::Assign, transform_status::TransformResult},
+    visitor::iast::operation_transform_visitor::OperationTransformVisitor,
 };
 
-use super::{binary_add_transform::BinaryAddTransform, transform_status::TransformResult};
+use super::binary_add_transform::BinaryAddTransform;
 
 pub struct AssignAddTransform {}
 

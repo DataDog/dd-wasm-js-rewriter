@@ -20,7 +20,7 @@ const { generateSourceMapFromFileContent } = require('../js/source-map')
 describe('rewriter configuration', () => {
   describe('csi exclusions', () => {
     const rewriteAndExpectWithCsiMethods = function (js, expect, csiMethods) {
-      const rewriter = new Rewriter({ csiMethods, localVarPrefix: 'test' })
+      const rewriter = new Rewriter({ csiMethods, localVarPrefix: 'test' }, ['iast'])
       return rewriteAndExpect(js, expect, false, { rewriter })
     }
 
@@ -143,7 +143,7 @@ _ddiast.plus("b" + c, "b", c));
   describe('telemetry verbosity', () => {
     it('should accept OFF verbosity', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'OFF' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -156,7 +156,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should accept MANDATORY verbosity', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'MANDATORY' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -169,7 +169,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should accept INFORMATION verbosity', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'INFORMATION' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -182,7 +182,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should accept DEBUG verbosity', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'DEBUG' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -196,7 +196,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should accept unknown verbosity and set it as INFORMATION', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'unknown' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -208,7 +208,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should apply Information verbosity as default', () => {
       const rewriter = new Rewriter({ csiMethods })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -224,7 +224,7 @@ _ddiast.plus("b" + c, "b", c));
     describe('rewrite method', () => {
       it('should have same return type as Rewriter.rewrite', () => {
         const rewriter = new DummyRewriter()
-        const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+        const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
         expect(response).to.have.property('content')
       })
     })
@@ -235,7 +235,7 @@ _ddiast.plus("b" + c, "b", c));
       const rewriter = new Rewriter({ csiMethods })
 
       const resource = resourceFile('sourcemap', 'StrUtil_external.js')
-      const result = rewriter.rewrite(resource.content, resource.filename)
+      const result = rewriter.rewrite(resource.content, resource.filename, ['iast'])
 
       const content = result.content
       expect(content).to.not.undefined
@@ -252,7 +252,7 @@ _ddiast.plus("b" + c, "b", c));
       const rewriter = new Rewriter({ csiMethods, chainSourceMap: true })
 
       const resource = resourceFile('sourcemap', 'StrUtil_external.js')
-      const result = rewriter.rewrite(resource.content, resource.filename)
+      const result = rewriter.rewrite(resource.content, resource.filename, ['iast'])
 
       const content = result.content
       expect(content).to.not.undefined
