@@ -65,7 +65,7 @@ function getCompileMethodFn (compileMethod) {
   return function (content, filename) {
     try {
       if (filename.indexOf(path.join('integration-test', 'requires')) > -1) {
-        const response = rewriter.rewrite(content, filename)
+        const response = rewriter.rewrite(content, filename, ['iast'])
         content = response.content
         addEditedFile(filename)
       }
