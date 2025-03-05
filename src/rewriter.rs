@@ -98,7 +98,7 @@ pub fn rewrite_js<R: Read>(
 
 
         parse_js(&source_file, handler, &compiler)
-            .and_then(|program| apply_transformation_passes(program, file, config))
+            .and_then(|program| apply_transformation_passes(program, config))
             .and_then(|(program, transform_status)| generate_output(program, transform_status, file, file_reader, config, &compiler))
     })
 }
@@ -177,21 +177,14 @@ fn parse_js(
 
 fn apply_transformation_passes(
     mut program: Program,
-    file: &str,
     config: &Config
-) -> Result<(Program, TransformStatus), Error >{
+) -> Result<(Program, TransformStatus)>{
     let passes: [fn(&mut Program, &mut TransformStatus, &Config); 2] = [transform_iast, transform_errortracking];
     let mut transform_status = TransformStatus::not_modified(config);
     for pass in passes.iter() {
         pass(&mut program, &mut transform_status, config);
         if transform_status.status == Status::Cancelled {
-            return Err(Error::msg(format!(
-                "Cancelling {} file rewrite. Reason: {}",
-                file,
-                transform_status
-                    .msg
-                    .unwrap_or_else(|| "unknown".to_string())
-            )))
+            return Ok((program, transform_status))
         }
     }
     Ok((program, transform_status))
@@ -242,19 +235,19 @@ fn generate_output<R: Read>(
 
     match transform_status.status {
         Status::Modified => {
-                        // extract sourcemap before printing otherwise comments are consumed
-                        // and looks like it is not possible to read them after compiler.print() invocation
-                        let original_source_map = extract_source_map(file, compiler.comments(), file_reader);
+            // extract sourcemap before printing otherwise comments are consumed
+            // and looks like it is not possible to read them after compiler.print() invocation
+            let original_source_map = extract_source_map(file, compiler.comments(), file_reader);
 
-                        compiler
-                            .print(&program, print_args)
-                            .map(|output| RewrittenOutput {
-                                code: output.code,
-                                source_map: output.map.unwrap_or_default(),
-                                original_source_map,
-                                transform_status: Some(transform_status),
-                                literals_result,
-                            })
+            compiler
+                .print(&program, print_args)
+                .map(|output| RewrittenOutput {
+                    code: output.code,
+                    source_map: output.map.unwrap_or_default(),
+                    original_source_map,
+                    transform_status: Some(transform_status),
+                    literals_result,
+                })
         }
         Status::NotModified => Ok(RewrittenOutput {
                 code: String::default(),
@@ -266,7 +259,13 @@ fn generate_output<R: Read>(
                 transform_status: Some(transform_status),
                 literals_result,
             }),
-        Status::Cancelled => Err(Error::msg("cannot happen")),
+        Status::Cancelled => Err(Error::msg(format!(
+            "Cancelling {} file rewrite. Reason: {}",
+            file,
+            transform_status
+                .msg
+                .unwrap_or_else(|| "unknown".to_string())
+        ))),
     }
 }
 
