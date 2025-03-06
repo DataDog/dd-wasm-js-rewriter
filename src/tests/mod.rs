@@ -16,6 +16,7 @@ use std::path::PathBuf;
 mod arrow_func_tests;
 mod binary_assignation_test;
 mod binary_expression_test;
+mod error_tracking_tests;
 mod literal_test;
 mod source_map_test;
 mod string_method_test;
@@ -75,6 +76,49 @@ fn rewrite_js_with_csi_methods(
         },
         &source_map_reader,
         &vec![String::from("iast")],
+    )
+}
+
+fn rewrite_js_with_error_tracking(code: String, file: String) -> Result<RewrittenOutput, Error> {
+    let source_map_reader = DefaultFileReader {};
+    crate::rewriter::rewrite_js(
+        code,
+        &file,
+        &Config {
+            chain_source_map: false,
+            print_comments: false,
+            local_var_prefix: String::default(),
+            csi_methods: CsiMethods::empty(),
+            verbosity: TelemetryVerbosity::Information,
+            literals: false,
+            file_prefix_code: Vec::new(),
+            strict: false,
+        },
+        &source_map_reader,
+        &[String::from("error_tracking")],
+    )
+}
+
+fn rewrite_js_with_error_tracking_and_iast(
+    code: String,
+    file: String,
+) -> Result<RewrittenOutput, Error> {
+    let source_map_reader = DefaultFileReader {};
+    crate::rewriter::rewrite_js(
+        code,
+        &file,
+        &Config {
+            chain_source_map: false,
+            print_comments: false,
+            local_var_prefix: "test".to_string(),
+            csi_methods: get_default_csi_methods(),
+            verbosity: TelemetryVerbosity::Information,
+            literals: false,
+            file_prefix_code: Vec::new(),
+            strict: false,
+        },
+        &source_map_reader,
+        &[String::from("iast"), String::from("error_tracking")],
     )
 }
 

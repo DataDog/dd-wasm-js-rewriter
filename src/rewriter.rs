@@ -6,6 +6,7 @@ use crate::{
     telemetry::TelemetryVerbosity,
     transform::transform_status::{Status, TransformStatus},
     util::{file_name, parse_source_map, FileReader},
+    visitor::errortracking::errortracking_block_transform_visitor::ErrorTrackingBlockTransformVisitor,
     visitor::iast::{
         csi_methods::CsiMethods,
         literal_visitor::{get_literals, LiteralsResult},
@@ -252,7 +253,15 @@ fn transform_iast(program: &mut Program, transform_status: &mut TransformStatus,
     program.visit_mut_with(&mut block_transform_visitor);
 }
 
-fn transform_errortracking(_: &mut Program, _: &mut TransformStatus, _: &Config) {}
+fn transform_errortracking(
+    program: &mut Program,
+    transform_status: &mut TransformStatus,
+    config: &Config,
+) {
+    let mut block_transform_visitor =
+        ErrorTrackingBlockTransformVisitor::default(transform_status, config);
+    program.visit_mut_with(&mut block_transform_visitor);
+}
 
 fn generate_output<R: Read>(
     mut program: Program,
@@ -416,7 +425,12 @@ fn extract_source_map<R: Read>(
 }
 
 pub fn generate_prefix_stmts(csi_methods: &CsiMethods) -> Vec<Stmt> {
-    let template = ";if (typeof _ddiast === 'undefined') (function(globals){ const noop = (res) => res; globals._ddiast = globals._ddiast || { __CSI_METHODS__ }; }((1,eval)('this')));";
+    let template = ";
+    if (typeof _ddiast === 'undefined') (function(globals) {
+        const noop = (res) => res;
+        globals._ddiast = globals._ddiast || { __CSI_METHODS__ };
+        globals._dderrortracking = globals._dderrortracking || { record_exception: noop };
+    }((1,eval)('this')));";
 
     let csi_methods_code = csi_methods
         .methods

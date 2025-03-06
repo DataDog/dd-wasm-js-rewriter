@@ -16,11 +16,10 @@ use crate::{
         },
         transform_status::{Status, TransformStatus},
     },
-};
-
-use crate::visitor::{
-    iast::{csi_methods::CsiMethods, ident_provider::IdentProvider},
-    visitor_with_context::{Ctx, VisitorWithContext},
+    visitor::{
+        iast::{csi_methods::CsiMethods, ident_provider::IdentProvider},
+        visitor_with_context::{Ctx, VisitorWithContext},
+    },
 };
 
 pub const ADD_TAG: &str = "+";
