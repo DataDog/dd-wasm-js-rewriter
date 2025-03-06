@@ -15,6 +15,7 @@ require,swc_common,Apache-2.0,Copyright 강동윤
 require,swc_ecma_ast,Apache-2.0,Copyright 강동윤
 require,swc_ecma_parser,Apache-2.0,Copyright 강동윤
 require,swc_ecma_visit,Apache-2.0,Copyright 강동윤
+require,rand,MIT OR Apache-2.0, Copyright Diggory Hardy
 require,wasm-bindgen,Apache-2.0 OR MIT,Copyright (c) 2014 Alex Crichton
 dev,@babel/core,MIT,Copyright (c) 2014-present Sebastian McKenzie and other contributors
 dev,@babel/parser,MIT,Copyright (c) Copyright (C) 2012-2014 by various contributors

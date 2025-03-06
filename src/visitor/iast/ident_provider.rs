@@ -70,10 +70,7 @@ pub trait IdentProvider {
     ) -> (AssignExpr, Ident) {
         let id = Ident {
             span: DUMMY_SP,
-            sym: get_dd_local_variable_name(
-                index,
-                &self.get_local_var_prefix(),
-            ).into(),
+            sym: get_dd_local_variable_name(index, &self.get_local_var_prefix()).into(),
             optional: false,
             ctxt: SyntaxContext::empty(),
         };

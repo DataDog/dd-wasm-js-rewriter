@@ -2,12 +2,11 @@
 * Unless explicitly stated otherwise all files in this repository are licensed under the Apache-2.0 License.
 * This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2022 Datadog, Inc.
 **/
-use super::ident_provider::DefaultIdentProvider;
 use crate::{
     rewriter::Config,
     transform::transform_status::{Status, TransformStatus},
     visitor::{
-        block_transform_utils::insert_prefix_statement,
+        block_transform_utils::insert_prefix_statement, iast::ident_provider::DefaultIdentProvider,
         iast::operation_transform_visitor::OperationTransformVisitor,
         visitor_utils::get_dd_local_variable_prefix, visitor_with_context::Ctx,
     },
