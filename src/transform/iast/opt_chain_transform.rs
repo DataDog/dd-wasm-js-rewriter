@@ -275,7 +275,7 @@ impl OptChainTransform {
 
         let cons = Ident {
             span: DUMMY_SP,
-            sym: JsWord::from("undefined"),
+            sym: "undefined".into(),
             optional: false,
             ctxt: SyntaxContext::empty(),
         };
