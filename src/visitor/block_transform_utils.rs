@@ -3,7 +3,7 @@
  * This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2022 Datadog, Inc.
  **/
 use crate::rewriter::Config;
-use swc_ecma_ast::{Program, ModuleItem};
+use swc_ecma_ast::{ModuleItem, Program};
 
 pub fn insert_prefix_statement(node: &mut Program, config: &Config) {
     match node {

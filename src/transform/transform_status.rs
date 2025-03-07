@@ -11,6 +11,7 @@ pub enum Status {
     Modified,
     NotModified,
     Cancelled,
+    Restart,
 }
 
 impl Display for Status {

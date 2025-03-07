@@ -7,10 +7,9 @@ use crate::{
     rewriter::Config,
     transform::transform_status::{Status, TransformStatus},
     visitor::{
-        visitor_with_context::Ctx,
+        block_transform_utils::insert_prefix_statement,
         iast::operation_transform_visitor::OperationTransformVisitor,
-        visitor_utils::get_dd_local_variable_prefix,
-        block_transform_utils::insert_prefix_statement
+        visitor_utils::get_dd_local_variable_prefix, visitor_with_context::Ctx,
     },
 };
 use std::collections::HashSet;

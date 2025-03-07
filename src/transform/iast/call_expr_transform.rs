@@ -18,8 +18,7 @@ use crate::{
 };
 
 use crate::{
-    visitor::visitor_utils::get_dd_paren_expr,
-    transform::transform_status::TransformResult
+    transform::transform_status::TransformResult, visitor::visitor_utils::get_dd_paren_expr,
 };
 
 use super::operand_handler::{ExpandArrays, IdentMode};

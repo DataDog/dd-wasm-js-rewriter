@@ -6,7 +6,7 @@ use swc_ecma_ast::*;
 use swc_ecma_visit::VisitMutWith;
 
 use crate::{
-    transform::{transform_status::TransformResult, iast::assign_add_transform::AssignOp::Assign},
+    transform::{iast::assign_add_transform::AssignOp::Assign, transform_status::TransformResult},
     visitor::iast::operation_transform_visitor::OperationTransformVisitor,
 };
 

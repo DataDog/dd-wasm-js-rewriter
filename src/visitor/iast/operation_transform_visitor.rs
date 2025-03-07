@@ -9,23 +9,17 @@ use swc_ecma_visit::{Visit, VisitMut, VisitMutWith};
 use crate::{
     telemetry::Telemetry,
     transform::{
-        transform_status::{Status, TransformStatus},
         iast::{
-            arrow_transform::ArrowTransform,
-            assign_add_transform::AssignAddTransform,
-            binary_add_transform::BinaryAddTransform,
-            call_expr_transform::CallExprTransform,
-            opt_chain_transform::OptChainTransform,
-            template_transform::TemplateTransform,
+            arrow_transform::ArrowTransform, assign_add_transform::AssignAddTransform,
+            binary_add_transform::BinaryAddTransform, call_expr_transform::CallExprTransform,
+            opt_chain_transform::OptChainTransform, template_transform::TemplateTransform,
         },
+        transform_status::{Status, TransformStatus},
     },
 };
 
 use crate::visitor::{
-    iast::{
-        csi_methods::CsiMethods,
-        ident_provider::IdentProvider,
-    },
+    iast::{csi_methods::CsiMethods, ident_provider::IdentProvider},
     visitor_with_context::{Ctx, VisitorWithContext},
 };
 

@@ -25,7 +25,7 @@ describe('logger', () => {
   it('should set logger as rewriter logger with ERROR level', () => {
     const rewriter = new Rewriter({ logLevel: 'ERROR', logger })
 
-    rewriter.rewrite('function concat(a, b){ return a + b }', 'test.js')
+    rewriter.rewrite('function concat(a, b){ return a + b }', 'test.js', ['iast'])
 
     expect(logger.error).to.have.been.calledOnceWith('Wasm js rewriter logger configured OK')
   })
@@ -33,7 +33,7 @@ describe('logger', () => {
   it('should set logger as rewriter logger with DEBUG level', () => {
     const rewriter = new Rewriter({ localVarPrefix: 'logger-test', logLevel: 'DEBUG', logger })
 
-    rewriter.rewrite('function concat(a, b){ return a + b }', 'test.js')
+    rewriter.rewrite('function concat(a, b){ return a + b }', 'test.js', ['iast'])
 
     expect(logger.debug).to.have.been.called
     expect(logger.debug.firstCall.args).to.deep.eq(['Wasm js rewriter logger configured OK'])
@@ -41,7 +41,7 @@ describe('logger', () => {
       'Rewriting js file: test.js with config: \
 Config { chain_source_map: false, print_comments: false, local_var_prefix: "logger-test", csi_methods: \
 CsiMethods { methods: [], plus_operator: None, tpl_operator: None, method_with_literal_callers: [] }, \
-verbosity: Information, literals: true, errortracking: false }'
+verbosity: Information, literals: true, strict: false }'
     ])
   })
 
@@ -50,7 +50,7 @@ verbosity: Information, literals: true, errortracking: false }'
 
     const rewriter = new Rewriter({ localVarPrefix: 'logger-test', logLevel: 'DEBUG' })
 
-    rewriter.rewrite('function concat(a, b){ return a + b }', 'test.js')
+    rewriter.rewrite('function concat(a, b){ return a + b }', 'test.js', ['iast'])
 
     expect(debug).to.have.been.called
     expect(debug.firstCall.args).to.deep.eq(['Wasm js rewriter logger configured OK'])
@@ -58,7 +58,7 @@ verbosity: Information, literals: true, errortracking: false }'
       'Rewriting js file: test.js with config: \
 Config { chain_source_map: false, print_comments: false, local_var_prefix: "logger-test", csi_methods: \
 CsiMethods { methods: [], plus_operator: None, tpl_operator: None, method_with_literal_callers: [] }, \
-verbosity: Information, literals: true, errortracking: false }'
+verbosity: Information, literals: true, strict: false }'
     ])
   })
 
@@ -67,7 +67,7 @@ verbosity: Information, literals: true, errortracking: false }'
 
     const rewriter = new Rewriter({ logLevel: 'OFF' })
 
-    rewriter.rewrite('function concat(a, b){ return a + b }', 'test.js')
+    rewriter.rewrite('function concat(a, b){ return a + b }', 'test.js', ['iast'])
 
     expect(debug).to.have.not.been.called
   })
