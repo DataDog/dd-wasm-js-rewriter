@@ -1,3 +1,4 @@
+use crate::transform::transform_status::TransformResult;
 /**
  * Unless explicitly stated otherwise all files in this repository are licensed under the Apache-2.0 License.
  * This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2022 Datadog, Inc.
@@ -6,8 +7,6 @@ use crate::visitor::iast::{
     csi_methods::CsiMethods,
     ident_provider::{IdentKind, IdentProvider},
 };
-use crate::transform::transform_status::TransformResult;
-use swc::atoms::JsWord;
 use swc_common::{util::take::Take, SyntaxContext, DUMMY_SP};
 use swc_ecma_ast::*;
 use swc_ecma_visit::{Visit, VisitMut, VisitMutWith};
