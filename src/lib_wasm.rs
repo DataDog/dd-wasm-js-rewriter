@@ -10,7 +10,10 @@ use crate::{
     tracer_logger::{self},
     transform::transform_status::TransformStatus,
     util::{rnd_string, FileReader},
-    visitor::{self, csi_methods::CsiMethods, literal_visitor::LiteralsResult},
+    visitor::{
+        self,
+        iast::{csi_methods::CsiMethods, literal_visitor::LiteralsResult},
+    },
 };
 use log::{debug, error};
 use serde::{Deserialize, Serialize};
@@ -39,6 +42,7 @@ pub struct RewriterConfig {
     pub csi_methods: Option<Vec<CsiMethod>>,
     pub telemetry_verbosity: Option<String>,
     pub literals: Option<bool>,
+    pub strict: Option<bool>,
 }
 
 #[derive(Serialize)]
@@ -67,6 +71,7 @@ impl RewriterConfig {
             csi_methods: None,
             telemetry_verbosity: Some("INFORMATION".to_string()),
             literals: Some(true),
+            strict: Some(false),
         }
     }
 
@@ -76,14 +81,14 @@ impl RewriterConfig {
                 &methods
                     .iter()
                     .map(|m| {
-                        visitor::csi_methods::CsiMethod::new(
+                        visitor::iast::csi_methods::CsiMethod::new(
                             m.src.clone(),
                             m.dst.clone(),
                             m.operator.unwrap_or(false),
                             m.allowed_without_callee.unwrap_or(false),
                         )
                     })
-                    .collect::<Vec<visitor::csi_methods::CsiMethod>>(),
+                    .collect::<Vec<visitor::iast::csi_methods::CsiMethod>>(),
             ),
 
             None => CsiMethods::empty(),
@@ -105,6 +110,7 @@ impl RewriterConfig {
             verbosity: TelemetryVerbosity::parse(self.telemetry_verbosity.clone()),
             literals: self.literals.unwrap_or(true),
             file_prefix_code,
+            strict: self.strict.unwrap_or(false),
         }
     }
 }
@@ -179,10 +185,14 @@ impl Rewriter {
     }
 
     #[wasm_bindgen]
-    pub fn rewrite(&mut self, code: String, file: String) -> anyhow::Result<JsValue, JsError> {
+    pub fn rewrite(
+        &mut self,
+        code: String,
+        file: String,
+        passes: Vec<String>,
+    ) -> anyhow::Result<JsValue, JsError> {
         let source_map_reader = WasmFileReader {};
-
-        rewrite_js(code, &file, &self.config, &source_map_reader)
+        rewrite_js(code, &file, &self.config, &source_map_reader, &passes)
             .map(|result| Result {
                 content: print_js(
                     &result.code,

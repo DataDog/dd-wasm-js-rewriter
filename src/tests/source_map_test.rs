@@ -97,6 +97,7 @@ mod tests {
             &String::from(js_file_to_rewrite.to_str().unwrap()),
             &get_default_config(true),
             &source_map_reader,
+            &vec![String::from("iast")],
         )
         .map_err(|e| e.to_string())
     }

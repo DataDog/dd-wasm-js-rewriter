@@ -6,10 +6,10 @@ use crate::{
     telemetry::TelemetryVerbosity,
     transform::transform_status::{Status, TransformStatus},
     util::{file_name, parse_source_map, FileReader},
-    visitor::{
-        block_transform_visitor::BlockTransformVisitor,
+    visitor::iast::{
         csi_methods::CsiMethods,
         literal_visitor::{get_literals, LiteralsResult},
+        taint_block_transform_visitor::TaintBlockTransformVisitor,
     },
 };
 use anyhow::{Error, Result};
@@ -35,7 +35,7 @@ use swc_common::{
 };
 use swc_ecma_ast::{EsVersion, Program, Stmt};
 
-use std::fmt;
+use std::{collections::HashSet, fmt};
 use swc_ecma_parser::{EsSyntax, Syntax};
 use swc_ecma_visit::VisitMutWith;
 
@@ -62,6 +62,7 @@ pub struct Config {
     pub verbosity: TelemetryVerbosity,
     pub literals: bool,
     pub file_prefix_code: Vec<Stmt>,
+    pub strict: bool,
 }
 
 impl fmt::Debug for Config {
@@ -73,30 +74,10 @@ impl fmt::Debug for Config {
             .field("csi_methods", &self.csi_methods)
             .field("verbosity", &self.verbosity)
             .field("literals", &self.literals)
+            .field("strict", &self.strict)
             // file_prefix_code intentionally ignored
             .finish()
     }
-}
-
-pub fn rewrite_js<R: Read>(
-    code: String,
-    file: &str,
-    config: &Config,
-    file_reader: &impl FileReader<R>,
-) -> Result<RewrittenOutput> {
-    debug!("Rewriting js file: {file} with config: {config:?}");
-
-    let compiler = Compiler::new(Arc::new(swc_common::SourceMap::new(
-        FilePathMapping::empty(),
-    )));
-    try_with_handler(compiler.cm.clone(), default_handler_opts(), |handler| {
-        let source_file = compiler
-            .cm
-            .new_source_file(Arc::new(FileName::Real(PathBuf::from(file))), code);
-
-        parse_js(&source_file, handler, &compiler)
-            .and_then(|program| transform_js(program, file, file_reader, config, &compiler))
-    })
 }
 
 pub fn print_js<'a>(
@@ -143,6 +124,78 @@ fn default_handler_opts() -> HandlerOpts {
     }
 }
 
+pub fn rewrite_js<R: Read>(
+    code: String,
+    file: &str,
+    config: &Config,
+    file_reader: &impl FileReader<R>,
+    base_passes: &[String],
+) -> Result<RewrittenOutput> {
+    debug!("Rewriting js file: {file} with config: {config:?}");
+
+    let compiler = Compiler::new(Arc::new(swc_common::SourceMap::new(
+        FilePathMapping::empty(),
+    )));
+    try_with_handler(compiler.cm.clone(), default_handler_opts(), |handler| {
+        let source_file = compiler
+            .cm
+            .new_source_file(Arc::new(FileName::Real(PathBuf::from(file))), code);
+
+        let mut passes: HashSet<fn(&mut Program, &mut TransformStatus, &Config)> = HashSet::new();
+        if base_passes.contains(&String::from("iast")) {
+            passes.insert(transform_iast);
+        }
+        if base_passes.contains(&String::from("error_tracking")) {
+            passes.insert(transform_errortracking);
+        }
+
+        parse_and_transform(
+            &source_file,
+            handler,
+            &compiler,
+            file,
+            file_reader,
+            config,
+            &mut passes,
+        )
+    })
+}
+
+fn parse_and_transform<R: Read>(
+    source_file: &Arc<SourceFile>,
+    handler: &Handler,
+    compiler: &Compiler,
+    file: &str,
+    file_reader: &impl FileReader<R>,
+    config: &Config,
+    passes: &mut HashSet<fn(&mut Program, &mut TransformStatus, &Config)>,
+) -> Result<RewrittenOutput, Error> {
+    parse_js(source_file, handler, compiler)
+        .and_then(|program| apply_transformation_passes(program, config, passes))
+        .and_then(|(program, transform_status)| {
+            if transform_status.status == Status::Restart {
+                parse_and_transform(
+                    source_file,
+                    handler,
+                    compiler,
+                    file,
+                    file_reader,
+                    config,
+                    passes,
+                )
+            } else {
+                generate_output(
+                    program,
+                    transform_status,
+                    file,
+                    file_reader,
+                    config,
+                    compiler,
+                )
+            }
+        })
+}
+
 fn parse_js(
     source_file: &Arc<SourceFile>,
     handler: &Handler,
@@ -171,18 +224,44 @@ fn parse_js(
     )
 }
 
-fn transform_js<R: Read>(
+fn apply_transformation_passes(
     mut program: Program,
+    config: &Config,
+    passes: &mut HashSet<fn(&mut Program, &mut TransformStatus, &Config)>,
+) -> Result<(Program, TransformStatus)> {
+    let mut transform_status = TransformStatus::not_modified(config);
+
+    if let Some(pass_to_remove) = passes
+        .iter()
+        .find(|&&pass| {
+            pass(&mut program, &mut transform_status, config);
+            transform_status.status == Status::Cancelled
+        })
+        .cloned()
+    {
+        passes.remove(&pass_to_remove);
+        if !passes.is_empty() && !config.strict {
+            transform_status.status = Status::Restart
+        }
+    }
+    Ok((program, transform_status))
+}
+
+fn transform_iast(program: &mut Program, transform_status: &mut TransformStatus, config: &Config) {
+    let mut block_transform_visitor = TaintBlockTransformVisitor::default(transform_status, config);
+    program.visit_mut_with(&mut block_transform_visitor);
+}
+
+fn transform_errortracking(_: &mut Program, _: &mut TransformStatus, _: &Config) {}
+
+fn generate_output<R: Read>(
+    mut program: Program,
+    transform_status: TransformStatus,
     file: &str,
     file_reader: &impl FileReader<R>,
     config: &Config,
     compiler: &Compiler,
 ) -> Result<RewrittenOutput, Error> {
-    let mut transform_status = TransformStatus::not_modified(config);
-
-    let mut block_transform_visitor = BlockTransformVisitor::default(&mut transform_status, config);
-    program.visit_mut_with(&mut block_transform_visitor);
-
     let literals_result = get_literals(config.literals, file, &mut program, compiler);
     let comments = &compiler.comments().clone() as &dyn Comments;
 
@@ -210,7 +289,6 @@ fn transform_js<R: Read>(
                     literals_result,
                 })
         }
-
         Status::NotModified => Ok(RewrittenOutput {
             code: String::default(),
             source_map: String::default(),
@@ -221,7 +299,6 @@ fn transform_js<R: Read>(
             transform_status: Some(transform_status),
             literals_result,
         }),
-
         Status::Cancelled => Err(Error::msg(format!(
             "Cancelling {} file rewrite. Reason: {}",
             file,
@@ -229,6 +306,7 @@ fn transform_js<R: Read>(
                 .msg
                 .unwrap_or_else(|| "unknown".to_string())
         ))),
+        Status::Restart => panic!("this cannot happen"),
     }
 }
 

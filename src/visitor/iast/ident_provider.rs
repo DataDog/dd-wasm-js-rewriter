@@ -9,7 +9,7 @@ use swc_ecma_ast::{
     SimpleAssignTarget,
 };
 
-use super::visitor_util::get_dd_local_variable_name;
+use crate::visitor::visitor_utils::get_dd_local_variable_name;
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum IdentKind {

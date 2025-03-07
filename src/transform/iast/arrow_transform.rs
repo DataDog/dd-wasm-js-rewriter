@@ -5,7 +5,7 @@
 use swc_common::{SyntaxContext, DUMMY_SP};
 use swc_ecma_ast::*;
 
-use super::transform_status::TransformResult;
+use crate::transform::transform_status::TransformResult;
 
 pub struct ArrowTransform {}
 

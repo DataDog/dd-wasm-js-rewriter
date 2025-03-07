@@ -2,13 +2,14 @@
 * Unless explicitly stated otherwise all files in this repository are licensed under the Apache-2.0 License.
 * This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2022 Datadog, Inc.
 **/
-use super::{ident_provider::DefaultIdentProvider, visitor_with_context::Ctx};
+use super::ident_provider::DefaultIdentProvider;
 use crate::{
     rewriter::Config,
     transform::transform_status::{Status, TransformStatus},
     visitor::{
-        operation_transform_visitor::OperationTransformVisitor,
-        visitor_util::get_dd_local_variable_prefix,
+        block_transform_utils::insert_prefix_statement,
+        iast::operation_transform_visitor::OperationTransformVisitor,
+        visitor_utils::get_dd_local_variable_prefix, visitor_with_context::Ctx,
     },
 };
 use std::collections::HashSet;
@@ -16,17 +17,17 @@ use swc_common::{SyntaxContext, DUMMY_SP};
 use swc_ecma_ast::{Stmt::Decl as DeclEnumOption, *};
 use swc_ecma_visit::{Visit, VisitMut, VisitMutWith};
 
-pub struct BlockTransformVisitor<'a> {
+pub struct TaintBlockTransformVisitor<'a> {
     pub transform_status: &'a mut TransformStatus,
     pub config: &'a Config,
 }
 
-impl BlockTransformVisitor<'_> {
+impl TaintBlockTransformVisitor<'_> {
     pub fn default<'a>(
         transform_status: &'a mut TransformStatus,
         config: &'a Config,
-    ) -> BlockTransformVisitor<'a> {
-        BlockTransformVisitor {
+    ) -> TaintBlockTransformVisitor<'a> {
+        TaintBlockTransformVisitor {
             transform_status,
             config,
         }
@@ -47,9 +48,9 @@ impl BlockTransformVisitor<'_> {
 //  - Replace found items by (__dd_XXX_1=....)
 //  - Create necessary temporal vars in top of block
 
-impl Visit for BlockTransformVisitor<'_> {}
+impl Visit for TaintBlockTransformVisitor<'_> {}
 
-impl VisitMut for BlockTransformVisitor<'_> {
+impl VisitMut for TaintBlockTransformVisitor<'_> {
     fn visit_mut_block_stmt(&mut self, expr: &mut BlockStmt) {
         if self.visit_is_cancelled() {
             return;
@@ -80,34 +81,7 @@ impl VisitMut for BlockTransformVisitor<'_> {
         node.visit_mut_children_with(self);
 
         if self.transform_status.status == Status::Modified {
-            match node {
-                Program::Script(script) => {
-                    let mut index = 0;
-                    if let Some(stmt) = script.body.first() {
-                        if stmt.is_use_strict() {
-                            index = 1;
-                        }
-                    }
-
-                    for prefix_statement in self.config.file_prefix_code.iter().rev() {
-                        script.body.insert(index, prefix_statement.clone());
-                    }
-                }
-                Program::Module(module) => {
-                    let mut index = 0;
-                    if let Some(ModuleItem::Stmt(stmt)) = module.body.first() {
-                        if stmt.is_use_strict() {
-                            index = 1;
-                        }
-                    }
-
-                    for prefix_statement in self.config.file_prefix_code.iter().rev() {
-                        module
-                            .body
-                            .insert(index, ModuleItem::Stmt(prefix_statement.clone()));
-                    }
-                }
-            }
+            insert_prefix_statement(node, self.config);
         }
     }
 }

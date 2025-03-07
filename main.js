@@ -30,8 +30,8 @@ class NonCacheRewriter {
     }
   }
 
-  rewrite (code, file) {
-    const response = this.nativeRewriter.rewrite(code, file)
+  rewrite (code, file, passes) {
+    const response = this.nativeRewriter.rewrite(code, file, passes)
 
     // rewrite returns an empty content when for the 'notmodified' status
     if (response?.metrics?.status === 'notmodified') {
@@ -63,8 +63,8 @@ class NonCacheRewriter {
 }
 
 class CacheRewriter extends NonCacheRewriter {
-  rewrite (code, file) {
-    const response = super.rewrite(code, file)
+  rewrite (code, file, passes) {
+    const response = super.rewrite(code, file, passes)
 
     try {
       const { metrics, content } = response
