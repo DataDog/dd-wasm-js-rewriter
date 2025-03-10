@@ -21,7 +21,7 @@ const removeSourceMap = (code) => {
 
 const removePrefix = (code) => {
   const PREFIX_DETECTOR = "((1, eval)('this')));"
-  const prefixIndex = code.indexOf(PREFIX_DETECTOR)
+  const prefixIndex = code.indexOf(PREFIX_DETECTOR, code.indexOf(PREFIX_DETECTOR) + 1)
   if (prefixIndex > -1) {
     return code.substring(prefixIndex + PREFIX_DETECTOR.length).trim()
   }

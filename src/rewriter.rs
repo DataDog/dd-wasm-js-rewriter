@@ -429,8 +429,12 @@ pub fn generate_prefix_stmts(csi_methods: &CsiMethods) -> Vec<Stmt> {
     if (typeof _ddiast === 'undefined') (function(globals) {
         const noop = (res) => res;
         globals._ddiast = globals._ddiast || { __CSI_METHODS__ };
+    }((1,eval)('this')));
+    if (typeof _dderrortracking === 'undefined') (function(globals) {
+        const noop = (res) => res;
         globals._dderrortracking = globals._dderrortracking || { record_exception: noop };
-    }((1,eval)('this')));";
+    }((1,eval)('this')));
+    ";
 
     let csi_methods_code = csi_methods
         .methods

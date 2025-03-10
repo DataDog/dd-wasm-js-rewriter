@@ -21,6 +21,12 @@ if (typeof _ddiast === 'undefined') (function(globals) {
     globals._ddiast = globals._ddiast || {
         trim: noop
     };
+}((1, eval)('this')));
+if (typeof _dderrortracking === 'undefined') (function(globals) {
+    const noop = (res)=>res;
+    globals._dderrortracking = globals._dderrortracking || {
+        record_exception: noop
+    };
 }((1, eval)('this')));`
 
 describe('Initialization prefix', () => {
@@ -118,7 +124,6 @@ ${comment}
 function a() { a.trim() }`
 
       const rewritten = rewriteAst(js, { ...testOptions, comments: true })
-
       expect(rewritten.startsWith(`"use strict";\n${EXPECTED_PREFIX}\n${comment}`)).to.be.true
     })
   })
