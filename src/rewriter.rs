@@ -16,6 +16,7 @@ use crate::{
 use anyhow::{Error, Result};
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use log::debug;
+use orchestrion_js::Instrumentor;
 use std::{
     borrow::Cow,
     collections::HashMap,
@@ -42,6 +43,15 @@ use swc_ecma_visit::VisitMutWith;
 
 const SOURCE_MAP_URL: &str = "# sourceMappingURL=";
 
+#[derive(Copy, Clone)]
+struct FileMeta<'a> {
+    module_name: Option<&'a str>,
+    module_version: Option<&'a str>,
+    filename: &'a PathBuf,
+}
+
+type TransformPass = fn(&mut Program, &mut TransformStatus, &mut Config, &FileMeta);
+
 pub struct RewrittenOutput {
     pub code: String,
     pub source_map: String,
@@ -64,6 +74,7 @@ pub struct Config {
     pub literals: bool,
     pub file_prefix_code: Vec<Stmt>,
     pub strict: bool,
+    pub instrumentor: Option<Instrumentor>,
 }
 
 impl fmt::Debug for Config {
@@ -128,9 +139,11 @@ fn default_handler_opts() -> HandlerOpts {
 pub fn rewrite_js<R: Read>(
     code: String,
     file: &str,
-    config: &Config,
+    config: &mut Config,
     file_reader: &impl FileReader<R>,
     base_passes: &[String],
+    module_name: Option<&str>,
+    module_version: Option<&str>,
 ) -> Result<RewrittenOutput> {
     debug!("Rewriting js file: {file} with config: {config:?}");
 
@@ -142,13 +155,21 @@ pub fn rewrite_js<R: Read>(
             .cm
             .new_source_file(Arc::new(FileName::Real(PathBuf::from(file))), code);
 
-        let mut passes: HashSet<fn(&mut Program, &mut TransformStatus, &Config)> = HashSet::new();
+        let mut passes: HashSet<TransformPass> = HashSet::new();
         if base_passes.contains(&String::from("iast")) {
             passes.insert(transform_iast);
         }
         if base_passes.contains(&String::from("error_tracking")) {
             passes.insert(transform_errortracking);
         }
+        if base_passes.contains(&String::from("orchestrion")) {
+            passes.insert(transform_orchestrion);
+        }
+        let meta = FileMeta {
+            module_name,
+            module_version,
+            filename: &PathBuf::from(file),
+        };
 
         parse_and_transform(
             &source_file,
@@ -158,21 +179,24 @@ pub fn rewrite_js<R: Read>(
             file_reader,
             config,
             &mut passes,
+            meta,
         )
     })
 }
 
+#[allow(clippy::too_many_arguments)]
 fn parse_and_transform<R: Read>(
     source_file: &Arc<SourceFile>,
     handler: &Handler,
     compiler: &Compiler,
     file: &str,
     file_reader: &impl FileReader<R>,
-    config: &Config,
-    passes: &mut HashSet<fn(&mut Program, &mut TransformStatus, &Config)>,
+    config: &mut Config,
+    passes: &mut HashSet<TransformPass>,
+    meta: FileMeta,
 ) -> Result<RewrittenOutput, Error> {
     parse_js(source_file, handler, compiler)
-        .and_then(|program| apply_transformation_passes(program, config, passes))
+        .and_then(|program| apply_transformation_passes(program, config, passes, meta))
         .and_then(|(program, transform_status)| {
             if transform_status.status == Status::Restart {
                 parse_and_transform(
@@ -183,6 +207,7 @@ fn parse_and_transform<R: Read>(
                     file_reader,
                     config,
                     passes,
+                    meta,
                 )
             } else {
                 generate_output(
@@ -227,15 +252,16 @@ fn parse_js(
 
 fn apply_transformation_passes(
     mut program: Program,
-    config: &Config,
-    passes: &mut HashSet<fn(&mut Program, &mut TransformStatus, &Config)>,
+    config: &mut Config,
+    passes: &mut HashSet<TransformPass>,
+    meta: FileMeta,
 ) -> Result<(Program, TransformStatus)> {
     let mut transform_status = TransformStatus::not_modified(config);
 
     if let Some(pass_to_remove) = passes
         .iter()
         .find(|&&pass| {
-            pass(&mut program, &mut transform_status, config);
+            pass(&mut program, &mut transform_status, config, &meta);
             transform_status.status == Status::Cancelled
         })
         .cloned()
@@ -248,7 +274,12 @@ fn apply_transformation_passes(
     Ok((program, transform_status))
 }
 
-fn transform_iast(program: &mut Program, transform_status: &mut TransformStatus, config: &Config) {
+fn transform_iast(
+    program: &mut Program,
+    transform_status: &mut TransformStatus,
+    config: &mut Config,
+    _meta: &FileMeta,
+) {
     let mut block_transform_visitor = TaintBlockTransformVisitor::default(transform_status, config);
     program.visit_mut_with(&mut block_transform_visitor);
 }
@@ -256,11 +287,29 @@ fn transform_iast(program: &mut Program, transform_status: &mut TransformStatus,
 fn transform_errortracking(
     program: &mut Program,
     transform_status: &mut TransformStatus,
-    config: &Config,
+    config: &mut Config,
+    _meta: &FileMeta,
 ) {
     let mut block_transform_visitor =
         ErrorTrackingBlockTransformVisitor::default(transform_status, config);
     program.visit_mut_with(&mut block_transform_visitor);
+}
+
+fn transform_orchestrion(
+    program: &mut Program,
+    transform_status: &mut TransformStatus,
+    config: &mut Config,
+    meta: &FileMeta,
+) {
+    if let Some(instrumentor) = &mut config.instrumentor {
+        if let (Some(name), Some(version)) = (meta.module_name, meta.module_version) {
+            let file_path = meta.filename;
+            let mut instrumentation_visitor =
+                instrumentor.get_matching_instrumentations(name, version, file_path);
+            program.visit_mut_with(&mut instrumentation_visitor);
+            transform_status.status = Status::Modified;
+        }
+    }
 }
 
 fn generate_output<R: Read>(

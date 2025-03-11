@@ -7,7 +7,7 @@ const { getPrepareStackTrace, kSymbolPrepareStackTrace } = require('./js/stack-t
 const { cacheRewrittenSourceMap, getOriginalPathAndLineFromSourceMap } = require('./js/source-map')
 
 class DummyRewriter {
-  rewrite (code, file) {
+  rewrite (code, file, passes, moduleName, moduleVersion) {
     return {
       content: code
     }
@@ -30,8 +30,8 @@ class NonCacheRewriter {
     }
   }
 
-  rewrite (code, file, passes) {
-    const response = this.nativeRewriter.rewrite(code, file, passes)
+  rewrite (code, file, passes, moduleName, moduleVersion) {
+    const response = this.nativeRewriter.rewrite(code, file, passes, moduleName, moduleVersion)
 
     // rewrite returns an empty content when for the 'notmodified' status
     if (response?.metrics?.status === 'notmodified') {
@@ -63,8 +63,8 @@ class NonCacheRewriter {
 }
 
 class CacheRewriter extends NonCacheRewriter {
-  rewrite (code, file, passes) {
-    const response = super.rewrite(code, file, passes)
+  rewrite (code, file, passes, moduleName, moduleVersion) {
+    const response = super.rewrite(code, file, passes, moduleName, moduleVersion)
 
     try {
       const { metrics, content } = response
