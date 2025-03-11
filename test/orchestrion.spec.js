@@ -5,7 +5,6 @@
 /* eslint-disable no-unused-expressions */
 'use strict'
 
-require('./setup.js')
 const { Rewriter } = require('./util')
 const fs = require('fs')
 const path = require('path')
@@ -52,7 +51,7 @@ describe('orchestrion', () => {
       orchestrion: ORCHESTRION_CONFIG,
       logLevel: 'DEBUG',
       telemetryVerbosity: 'DEBUG',
-      literals: false, // TODO this breaks when enabled
+      literals: true, // TODO this breaks when enabled
       logger
     })
   })
