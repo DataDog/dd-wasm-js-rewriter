@@ -64,7 +64,7 @@ describe('orchestrion', () => {
   it('should rewrite undici index.js file', async function () {
     const indexPath = path.join(undiciDir, 'index.js')
     const code = fs.readFileSync(indexPath, 'utf8')
-    const result = rewriter.rewrite(code, 'index.js', ['orchestrion'], 'undici', '0.0.2')
+    const result = rewriter.rewrite(code, indexPath, ['orchestrion'])
 
     // Verify rewriting was successful
     expect(result).to.have.property('content')
