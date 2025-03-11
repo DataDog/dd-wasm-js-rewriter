@@ -196,7 +196,7 @@ module.exports.EventSource = EventSource;
         let source_map_reader = DefaultFileReader {};
         crate::rewriter::rewrite_js(
             code.to_string(),
-            "index.js",
+            "/foo/bar/node_modules/undici/index.js",
             &mut config,
             &source_map_reader,
             passes,

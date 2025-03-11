@@ -5,6 +5,7 @@
 'use strict'
 const { getPrepareStackTrace, kSymbolPrepareStackTrace } = require('./js/stack-trace/')
 const { cacheRewrittenSourceMap, getOriginalPathAndLineFromSourceMap } = require('./js/source-map')
+const getNameAndVersion = require('./js/module-details')
 
 class DummyRewriter {
   rewrite (code, file, passes, moduleName, moduleVersion) {
@@ -30,7 +31,14 @@ class NonCacheRewriter {
     }
   }
 
-  rewrite (code, file, passes, moduleName, moduleVersion) {
+  rewrite (code, file, passes) {
+    let moduleName
+    let moduleVersion
+    if (passes.includes('orchestrion')) {
+      const details = getNameAndVersion(file)
+      moduleName = details.name
+      moduleVersion = details.version
+    }
     const response = this.nativeRewriter.rewrite(code, file, passes, moduleName, moduleVersion)
 
     // rewrite returns an empty content when for the 'notmodified' status

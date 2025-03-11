@@ -303,11 +303,16 @@ fn transform_orchestrion(
 ) {
     if let Some(instrumentor) = &mut config.instrumentor {
         if let (Some(name), Some(version)) = (meta.module_name, meta.module_version) {
-            let file_path = meta.filename;
-            let mut instrumentation_visitor =
-                instrumentor.get_matching_instrumentations(name, version, file_path);
-            program.visit_mut_with(&mut instrumentation_visitor);
-            transform_status.status = Status::Modified;
+            let file_path = meta.filename.to_str().unwrap();
+            let searchable = format!("node_modules/{}", name);
+            if let Some(index) = file_path.find(&searchable) {
+                let path = &file_path[(index + searchable.len() + 1)..];
+                let path = path.into();
+                let mut instrumentation_visitor =
+                    instrumentor.get_matching_instrumentations(name, version, &path);
+                program.visit_mut_with(&mut instrumentation_visitor);
+                transform_status.status = Status::Modified;
+            }
         }
     }
 }
