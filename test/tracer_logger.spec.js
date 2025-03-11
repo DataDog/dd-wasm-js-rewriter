@@ -6,7 +6,7 @@
 /* eslint-disable no-unused-expressions */
 'use strict'
 
-const { expect } = require('chai')
+require('./setup.js')
 const { Rewriter } = require('./util')
 
 describe('logger', () => {

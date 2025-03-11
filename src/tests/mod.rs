@@ -18,6 +18,7 @@ mod binary_assignation_test;
 mod binary_expression_test;
 mod error_tracking_tests;
 mod literal_test;
+mod orchestrion_test;
 mod source_map_test;
 mod string_method_test;
 mod telemetry_test;
@@ -34,9 +35,11 @@ fn rewrite_js(code: String, file: String) -> Result<RewrittenOutput, Error> {
     crate::rewriter::rewrite_js(
         code,
         &file,
-        &get_default_config(false),
+        &mut get_default_config(false),
         &source_map_reader,
         &vec![String::from("iast")],
+        None,
+        None,
     )
 }
 
@@ -49,9 +52,11 @@ fn rewrite_js_with_telemetry_verbosity(
     crate::rewriter::rewrite_js(
         code,
         &file,
-        &get_default_config_with_verbosity(false, verbosity),
+        &mut get_default_config_with_verbosity(false, verbosity),
         &source_map_reader,
         &vec![String::from("iast")],
+        None,
+        None,
     )
 }
 
@@ -64,7 +69,7 @@ fn rewrite_js_with_csi_methods(
     crate::rewriter::rewrite_js(
         code,
         &file,
-        &Config {
+        &mut Config {
             chain_source_map: false,
             print_comments: false,
             local_var_prefix: "test".to_string(),
@@ -73,9 +78,12 @@ fn rewrite_js_with_csi_methods(
             literals: false,
             file_prefix_code: Vec::new(),
             strict: false,
+            instrumentor: None,
         },
         &source_map_reader,
         &vec![String::from("iast")],
+        None,
+        None,
     )
 }
 
@@ -84,7 +92,7 @@ fn rewrite_js_with_error_tracking(code: String, file: String) -> Result<Rewritte
     crate::rewriter::rewrite_js(
         code,
         &file,
-        &Config {
+        &mut Config {
             chain_source_map: false,
             print_comments: false,
             local_var_prefix: String::default(),
@@ -93,9 +101,12 @@ fn rewrite_js_with_error_tracking(code: String, file: String) -> Result<Rewritte
             literals: false,
             file_prefix_code: Vec::new(),
             strict: false,
+            instrumentor: None,
         },
         &source_map_reader,
         &[String::from("error_tracking")],
+        None,
+        None,
     )
 }
 
@@ -107,7 +118,7 @@ fn rewrite_js_with_error_tracking_and_iast(
     crate::rewriter::rewrite_js(
         code,
         &file,
-        &Config {
+        &mut Config {
             chain_source_map: false,
             print_comments: false,
             local_var_prefix: "test".to_string(),
@@ -116,13 +127,16 @@ fn rewrite_js_with_error_tracking_and_iast(
             literals: false,
             file_prefix_code: Vec::new(),
             strict: false,
+            instrumentor: None,
         },
         &source_map_reader,
         &[String::from("iast"), String::from("error_tracking")],
+        None,
+        None,
     )
 }
 
-fn rewrite_js_with_config(code: String, config: &Config) -> Result<RewrittenOutput, Error> {
+fn rewrite_js_with_config(code: String, config: &mut Config) -> Result<RewrittenOutput, Error> {
     let source_map_reader = DefaultFileReader {};
     crate::rewriter::rewrite_js(
         code,
@@ -130,6 +144,8 @@ fn rewrite_js_with_config(code: String, config: &Config) -> Result<RewrittenOutp
         config,
         &source_map_reader,
         &vec![String::from("iast")],
+        None,
+        None,
     )
 }
 
@@ -165,6 +181,7 @@ fn get_default_config_with_verbosity(
         literals: false,
         file_prefix_code: Vec::new(),
         strict: false,
+        instrumentor: None,
     }
 }
 
@@ -178,6 +195,7 @@ fn get_chained_and_print_comments_config() -> Config {
         literals: false,
         file_prefix_code: Vec::new(),
         strict: false,
+        instrumentor: None,
     }
 }
 
@@ -191,6 +209,7 @@ fn get_literals_config() -> Config {
         literals: true,
         file_prefix_code: Vec::new(),
         strict: false,
+        instrumentor: None,
     }
 }
 

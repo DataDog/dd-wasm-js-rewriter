@@ -7,7 +7,7 @@
 
 const fs = require('fs')
 const path = require('path')
-const proxyquire = require('proxyquire')
+const proxyquire = require('proxyquire').noPreserveCache()
 
 const { getPrepareStackTrace } = require('../js/stack-trace')
 const { getSourcePathAndLineFromSourceMaps } = require('../js/source-map')
@@ -187,6 +187,8 @@ describe('getOriginalPathAndLineFromSourceMapFromSourceMap', () => {
 
   afterEach(() => {
     sinon.reset()
+    setLRU.resetHistory()
+    getLRU.resetHistory()
     sourceMapsMap.clear()
   })
 
