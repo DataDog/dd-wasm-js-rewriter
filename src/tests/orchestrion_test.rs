@@ -176,7 +176,8 @@ module.exports.EventSource = EventSource;
             csi_methods: CsiMethods::new(&vec![]),
             verbosity: TelemetryVerbosity::Debug,
             literals: false,
-            file_prefix_code: Vec::new(),
+            file_iast_prefix_code: Vec::new(),
+            file_errtracking_prefix_code: Vec::new(),
             strict: false,
             instrumentor: if orchestrion {
                 Some(ORCHESTRION_CONFIG.parse().unwrap())

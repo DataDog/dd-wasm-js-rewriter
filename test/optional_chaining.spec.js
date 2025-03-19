@@ -11,19 +11,19 @@ describe('Optional chaining', () => {
     it('does not rewrite if it is not necessary', () => {
       const js = 'a?.customMethod(1);'
 
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does not rewrite when it is a delete', () => {
       const js = 'delete a?.substring(1).b;'
 
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('should not modify optional method', () => {
       const js = 'a?.substring?.(1);'
 
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('should modify a?.substring(1)', () => {
@@ -37,6 +37,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_1 = __datadog_test_0, __datadog_test_2 = __datadog_test_1.substring, \
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -52,6 +53,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_1 = __datadog_test_0, __datadog_test_2 = __datadog_test_1.substring, \
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -67,6 +69,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_1 = __datadog_test_0, __datadog_test_2 = __datadog_test_1.substring, \
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -85,6 +88,7 @@ __datadog_test_0 == null ? undefined : (__datadog_test_4 = __datadog_test_0, \
 __datadog_test_5 = __datadog_test_4.substring, _ddiast.stringSubstring(\
 __datadog_test_5.call(__datadog_test_4, 1), __datadog_test_5, __datadog_test_4, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -100,6 +104,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_1 = __datadog_test_0.b, __datadog_test_2 = __datadog_test_1.substring, \
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -115,6 +120,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_1 = __datadog_test_0, __datadog_test_2 = __datadog_test_1.substring, \
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -131,6 +137,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, __datadog_test_1, 1))\
 .otherMethod(2));
 }`,
+        ['iast'],
         false
       )
     })
@@ -147,6 +154,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, __datadog_test_1, 1))\
 .c?.otherMethod(2));
 }`,
+        ['iast'],
         false
       )
     })
@@ -163,6 +171,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2, __datadog_test_3;
 __datadog_test_3 = __datadog_test_2.substring, _ddiast.stringSubstring(__datadog_test_3.call(__datadog_test_2, 1), \
 __datadog_test_3, __datadog_test_2, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -178,6 +187,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 __datadog_test_2 = __datadog_test_1.substring, _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), \
 __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -194,6 +204,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, \
 __datadog_test_1, 1)))).otherMethod();
 }`,
+        ['iast'],
         false
       )
     })
@@ -209,6 +220,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_1 = __datadog_test_0.param, __datadog_test_2 = __datadog_test_1.substring, \
 _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -226,6 +238,7 @@ __datadog_test_3.call(__datadog_test_2, 1), __datadog_test_3, __datadog_test_2, 
 undefined : (__datadog_test_4 = __datadog_test_0.b, __datadog_test_5 = __datadog_test_4.substring, \
 _ddiast.stringSubstring(__datadog_test_5.call(__datadog_test_4, 2), __datadog_test_5, __datadog_test_4, 2)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -241,6 +254,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 __datadog_test_2 = __datadog_test_1.substring, _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), \
 __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -256,6 +270,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 __datadog_test_2 = __datadog_test_1.substring, _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), \
 __datadog_test_2, __datadog_test_1, 1)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -370,7 +385,7 @@ __datadog_test_3)));
       // eslint-disable-next-line no-eval
       const originalResult = eval(code)
       // eslint-disable-next-line no-eval
-      const modifiedResult = eval(rewriteAst(code))
+      const modifiedResult = eval(rewriteAst(code, ['iast']))
 
       expect(modifiedResult).to.be.eq(originalResult)
     }

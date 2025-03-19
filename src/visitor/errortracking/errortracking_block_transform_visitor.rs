@@ -4,17 +4,17 @@
 **/
 use crate::{
     rewriter::Config,
-    transform::transform_status::{Status, TransformStatus},
-    visitor::block_transform_utils::insert_prefix_statement,
+    transform::{
+        errortracking::{
+            catch_clause_body_transform::CatchClauseBodyTransform,
+            catch_clause_pat_transform::CatchClausePatTransform,
+            catch_member_transform::CatchMemberTransform,
+        },
+        transform_status::{Status, TransformStatus},
+    },
+    visitor::block_transform_utils::{get_program_hash, insert_prefix_statement},
 };
-use rand::{thread_rng, Rng};
-use std::fmt::Write;
-use swc_common::{SyntaxContext, DUMMY_SP};
-use swc_ecma_ast::{
-    AssignExpr, AssignOp, AssignTarget, AssignTargetPat, BindingIdent, CallExpr, Callee,
-    CatchClause, Expr, ExprOrSpread, ExprStmt, Ident, IdentName, MemberExpr, MemberProp, Pat,
-    Program, Stmt,
-};
+use swc_ecma_ast::{CallExpr, CatchClause, ExprOrSpread, Pat, Program};
 use swc_ecma_visit::{Visit, VisitMut, VisitMutWith};
 
 pub struct ErrorTrackingBlockTransformVisitor<'a> {
@@ -32,120 +32,81 @@ impl ErrorTrackingBlockTransformVisitor<'_> {
             config,
         }
     }
+
+    fn visit_is_cancelled(&mut self) -> bool {
+        self.transform_status.status == Status::Cancelled
+    }
+
+    pub fn cancel_visit(&mut self, reason: &str) {
+        self.transform_status.status = Status::Cancelled;
+        self.transform_status.msg = Some(reason.to_string());
+    }
 }
 
 impl Visit for ErrorTrackingBlockTransformVisitor<'_> {}
 
 impl VisitMut for ErrorTrackingBlockTransformVisitor<'_> {
     fn visit_mut_catch_clause(&mut self, catch: &mut CatchClause) {
+        if self.visit_is_cancelled() {
+            return;
+        }
         catch.visit_mut_children_with(self);
-        match &mut catch.param {
-            Some(pat) => {
-                let param_to_restore = match pat {
-                    Pat::Ident(_) => None,
-                    Pat::Array(_) => {
-                        let old_param = Some(pat.clone());
-                        *pat = Pat::Ident(get_new_binding_indent());
-                        old_param
-                    }
-                    Pat::Object(_) => {
-                        let old_param = Some(pat.clone());
-                        *pat = Pat::Ident(get_new_binding_indent());
-                        old_param
-                    }
-                    _ => None,
-                };
+        let new_pat_result = match &catch.param {
+            Some(Pat::Array(_) | Pat::Object(_)) | None => Some(
+                CatchClausePatTransform::to_dd_catch_clause_pat(&self.config.local_var_prefix),
+            ),
+            Some(Pat::Ident(_)) => None,
+            _ => {
+                return self.cancel_visit("unexpected catch clause");
+            }
+        };
 
-                // Inject function call
-                let body = &mut catch.body;
-                if let Some(param) = &param_to_restore {
-                    body.stmts.insert(0, create_restore_assignement(param, pat));
-                }
-                body.stmts.insert(0, create_record_call(pat));
-            }
-            None => {
-                catch.param = Some(Pat::Ident(get_new_binding_indent()));
-                let body = &mut catch.body;
-                body.stmts
-                    .insert(0, create_record_call(catch.param.as_ref().unwrap()));
-            }
+        if let Some(new_pat) = new_pat_result {
+            let base_catch_param = catch.param.clone();
+            catch.param = Some(new_pat.clone());
+            CatchClauseBodyTransform::to_dd_catch_clause_body(
+                &mut catch.body,
+                &new_pat,
+                base_catch_param,
+            );
+        } else {
+            CatchClauseBodyTransform::to_dd_catch_clause_body(
+                &mut catch.body,
+                catch.param.as_ref().unwrap(),
+                None,
+            );
         }
         self.transform_status.status = Status::Modified;
     }
 
+    fn visit_mut_call_expr(&mut self, node: &mut CallExpr) {
+        if self.visit_is_cancelled() {
+            return;
+        }
+
+        if let Some(expr) = node.callee.as_expr() {
+            if let Some(member_expr) = expr.as_member() {
+                let prop: &swc_ecma_ast::MemberProp = &member_expr.prop;
+                if prop.is_ident_with("catch") {
+                    let args: &mut Vec<ExprOrSpread> = &mut node.args;
+                    if args.len() == 1 {
+                        *args = CatchMemberTransform::to_dd_args(args);
+                        self.transform_status.status = Status::Modified;
+                    }
+                }
+            }
+        }
+        node.visit_mut_children_with(self);
+    }
+
     fn visit_mut_program(&mut self, node: &mut Program) {
+        let base_program_hash = get_program_hash(node);
         node.visit_mut_children_with(self);
 
-        if self.transform_status.status == Status::Modified {
-            insert_prefix_statement(node, self.config);
+        if self.transform_status.status == Status::Modified
+            && base_program_hash != get_program_hash(node)
+        {
+            insert_prefix_statement(node, &self.config.file_errtracking_prefix_code);
         }
-    }
-}
-
-fn create_record_call(pat: &Pat) -> Stmt {
-    Stmt::Expr(ExprStmt {
-        span: DUMMY_SP,
-        expr: Box::new(Expr::Call(CallExpr {
-            span: DUMMY_SP,
-            callee: Callee::Expr(Box::new(Expr::Member(MemberExpr {
-                span: DUMMY_SP,
-                obj: Box::new(Expr::Ident(Ident {
-                    span: DUMMY_SP,
-                    sym: "_dderrortracking".into(),
-                    optional: false,
-                    ctxt: SyntaxContext::empty(),
-                })),
-                prop: MemberProp::Ident(IdentName {
-                    span: DUMMY_SP,
-                    sym: "record_exception".into(),
-                }),
-            }))),
-            args: vec![ExprOrSpread {
-                spread: None,
-                expr: Box::new(Expr::Ident(pat.as_ident().unwrap().clone().id)),
-            }],
-            type_args: None,
-            ctxt: SyntaxContext::empty(),
-        })),
-    })
-}
-
-fn create_restore_assignement(left: &Pat, right: &Pat) -> Stmt {
-    Stmt::Expr(ExprStmt {
-        span: DUMMY_SP,
-        expr: Box::new(Expr::Assign(AssignExpr {
-            span: DUMMY_SP,
-            op: AssignOp::Assign,
-            left: match left {
-                Pat::Array(array) => Some(AssignTarget::Pat(AssignTargetPat::Array(array.clone()))),
-                Pat::Object(object) => {
-                    Some(AssignTarget::Pat(AssignTargetPat::Object(object.clone())))
-                }
-                _ => None,
-            }
-            .unwrap(),
-            right: Box::new(Expr::Ident(right.as_ident().unwrap().clone().id)),
-        })),
-    })
-}
-
-fn random_hash(size: usize) -> String {
-    let mut rng = thread_rng();
-    let mut output = String::new();
-    for _ in 0..size {
-        let _ = write!(output, "{:x}", rng.gen_range(0..16)); // Generates a hex digit
-    }
-    output
-}
-
-fn get_new_binding_indent() -> BindingIdent {
-    BindingIdent {
-        id: Ident {
-            span: DUMMY_SP,
-            sym: format!("__datadog_errortracking_{}", random_hash(16)).into(),
-            optional: false,
-            ctxt: SyntaxContext::empty(),
-        },
-        type_ann: None,
     }
 }

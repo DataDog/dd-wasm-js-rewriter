@@ -19,9 +19,9 @@ const { generateSourceMapFromFileContent } = require('../js/source-map')
 
 describe('rewriter configuration', () => {
   describe('csi exclusions', () => {
-    const rewriteAndExpectWithCsiMethods = function (js, expect, csiMethods) {
+    const rewriteAndExpectWithCsiMethods = function (js, expect, passes, csiMethods) {
       const rewriter = new Rewriter({ csiMethods, localVarPrefix: 'test' }, ['iast'])
-      return rewriteAndExpect(js, expect, false, { rewriter })
+      return rewriteAndExpect(js, expect, passes, false, { rewriter })
     }
 
     const onlySubstringCsiMethod = [{ src: 'substring', dst: 'string_substring' }]
@@ -34,7 +34,7 @@ describe('rewriter configuration', () => {
     it('does not rewrite excluded method', () => {
       const rewriter = new Rewriter()
       const js = 'const result = a.concat("b");'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does rewrite method and keep excluded', () => {
@@ -46,6 +46,7 @@ describe('rewriter configuration', () => {
 const result = (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.substring, _ddiast.string_substring(\
 __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2)).concat("b");
       }`,
+        ['iast'],
         onlySubstringCsiMethod
       )
     })
@@ -53,26 +54,26 @@ __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 
     it('does not rewrite multiple excluded methods', () => {
       const rewriter = new Rewriter()
       const js = 'const result = a.substring(2).concat("b");'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does not rewrite + operation', () => {
       const rewriter = new Rewriter()
       const js = 'const result = a.concat("b" + c);'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does not rewrite += operation', () => {
       const rewriter = new Rewriter()
       const js = 'result += a.concat("b");'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does not rewrite template literals operation', () => {
       const rewriter = new Rewriter()
       // eslint-disable-next-line no-template-curly-in-string
       const js = 'const result = `hello ${a}`'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does rewrite + with altenative dst name and substring and keep excluded', () => {
@@ -85,6 +86,7 @@ const result = (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.substr
 __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2)).concat(\
 _ddiast.plus("b" + c, "b", c));
       }`,
+        ['iast'],
         plusOperatorAndOthersCsiMethods
       )
     })
@@ -99,6 +101,7 @@ const result = (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.custom
 __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2)).concat(\
 _ddiast.plus("b" + c, "b", c));
       }`,
+        ['iast'],
         plusOperatorAndOthersCsiMethods
       )
     })
@@ -113,6 +116,7 @@ const result = (__datadog_test_0 = a, __datadog_test_1 = Whatever.prototype.cust
 __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2)).concat(\
 _ddiast.plus("b" + c, "b", c));
       }`,
+        ['iast'],
         plusOperatorAndOthersCsiMethods
       )
     })
