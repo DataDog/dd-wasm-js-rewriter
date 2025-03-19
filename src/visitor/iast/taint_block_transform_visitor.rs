@@ -6,9 +6,13 @@ use crate::{
     rewriter::Config,
     transform::transform_status::{Status, TransformStatus},
     visitor::{
-        block_transform_utils::insert_prefix_statement, iast::ident_provider::DefaultIdentProvider,
-        iast::operation_transform_visitor::OperationTransformVisitor,
-        visitor_utils::get_dd_local_variable_prefix, visitor_with_context::Ctx,
+        block_transform_utils::{get_program_hash, insert_prefix_statement},
+        iast::{
+            ident_provider::DefaultIdentProvider,
+            operation_transform_visitor::OperationTransformVisitor,
+        },
+        visitor_utils::get_dd_local_variable_prefix,
+        visitor_with_context::Ctx,
     },
 };
 use std::collections::HashSet;
@@ -77,10 +81,13 @@ impl VisitMut for TaintBlockTransformVisitor<'_> {
     }
 
     fn visit_mut_program(&mut self, node: &mut Program) {
+        let base_program_hash = get_program_hash(node);
         node.visit_mut_children_with(self);
 
-        if self.transform_status.status == Status::Modified {
-            insert_prefix_statement(node, self.config);
+        if self.transform_status.status == Status::Modified
+            && base_program_hash != get_program_hash(node)
+        {
+            insert_prefix_statement(node, &self.config.file_iast_prefix_code);
         }
     }
 }

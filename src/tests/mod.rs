@@ -19,6 +19,7 @@ mod binary_expression_test;
 mod error_tracking_tests;
 mod literal_test;
 mod orchestrion_test;
+mod pass_interactions_tests;
 mod source_map_test;
 mod string_method_test;
 mod telemetry_test;
@@ -76,7 +77,8 @@ fn rewrite_js_with_csi_methods(
             csi_methods: csi_methods.clone(),
             verbosity: TelemetryVerbosity::Information,
             literals: false,
-            file_prefix_code: Vec::new(),
+            file_iast_prefix_code: Vec::new(),
+            file_errtracking_prefix_code: Vec::new(),
             strict: false,
             instrumentor: None,
         },
@@ -87,7 +89,11 @@ fn rewrite_js_with_csi_methods(
     )
 }
 
-fn rewrite_js_with_error_tracking(code: String, file: String) -> Result<RewrittenOutput, Error> {
+fn rewrite_js_with_error_tracking(
+    code: String,
+    file: String,
+    prefix: String,
+) -> Result<RewrittenOutput, Error> {
     let source_map_reader = DefaultFileReader {};
     crate::rewriter::rewrite_js(
         code,
@@ -95,16 +101,17 @@ fn rewrite_js_with_error_tracking(code: String, file: String) -> Result<Rewritte
         &mut Config {
             chain_source_map: false,
             print_comments: false,
-            local_var_prefix: String::default(),
+            local_var_prefix: prefix,
             csi_methods: CsiMethods::empty(),
             verbosity: TelemetryVerbosity::Information,
             literals: false,
-            file_prefix_code: Vec::new(),
+            file_iast_prefix_code: Vec::new(),
+            file_errtracking_prefix_code: Vec::new(),
             strict: false,
             instrumentor: None,
         },
         &source_map_reader,
-        &[String::from("error_tracking")],
+        &[String::from("errortracking")],
         None,
         None,
     )
@@ -125,12 +132,13 @@ fn rewrite_js_with_error_tracking_and_iast(
             csi_methods: get_default_csi_methods(),
             verbosity: TelemetryVerbosity::Information,
             literals: false,
-            file_prefix_code: Vec::new(),
+            file_iast_prefix_code: Vec::new(),
+            file_errtracking_prefix_code: Vec::new(),
             strict: false,
             instrumentor: None,
         },
         &source_map_reader,
-        &[String::from("iast"), String::from("error_tracking")],
+        &[String::from("iast"), String::from("errortracking")],
         None,
         None,
     )
@@ -179,7 +187,8 @@ fn get_default_config_with_verbosity(
         csi_methods: get_default_csi_methods(),
         verbosity,
         literals: false,
-        file_prefix_code: Vec::new(),
+        file_iast_prefix_code: Vec::new(),
+        file_errtracking_prefix_code: Vec::new(),
         strict: false,
         instrumentor: None,
     }
@@ -193,7 +202,8 @@ fn get_chained_and_print_comments_config() -> Config {
         csi_methods: get_default_csi_methods(),
         verbosity: TelemetryVerbosity::Debug,
         literals: false,
-        file_prefix_code: Vec::new(),
+        file_iast_prefix_code: Vec::new(),
+        file_errtracking_prefix_code: Vec::new(),
         strict: false,
         instrumentor: None,
     }
@@ -207,7 +217,8 @@ fn get_literals_config() -> Config {
         csi_methods: get_default_csi_methods(),
         verbosity: TelemetryVerbosity::Debug,
         literals: true,
-        file_prefix_code: Vec::new(),
+        file_iast_prefix_code: Vec::new(),
+        file_errtracking_prefix_code: Vec::new(),
         strict: false,
         instrumentor: None,
     }

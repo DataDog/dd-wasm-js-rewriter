@@ -3471,6 +3471,7 @@ dependencies = [
  "log",
  "orchestrion-js",
  "rand",
+ "regex",
  "serde",
  "serde-wasm-bindgen",
  "speculoos",
