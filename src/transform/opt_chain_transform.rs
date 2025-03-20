@@ -237,9 +237,12 @@ impl VisitMut for OptChainVisitor<'_> {
 
                 expr.visit_mut_children_with(self);
             }
-            Expr::Arrow(_) => {
-                // do nothing and skip on Arrow expression
-            }
+            // do nothing and skip in Arrow (() => {}) expressions
+            Expr::Arrow(_) => {}
+            // do nothing and skip in Function (function () {}) expressions
+            Expr::Fn(_) => {}
+            // do nothing and skip in Class (class) expressions
+            Expr::Class(_) => {}
             _ => {
                 expr.visit_mut_children_with(self);
             }

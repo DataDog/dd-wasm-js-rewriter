@@ -276,6 +276,23 @@ __datadog_test_2, __datadog_test_1, 1)));
         false
       )
     })
+
+    it('should modify a?.customMethod(function (b) { return b?.substring(1) })', () => {
+      const js = 'a?.customMethod(function (b) { return b?.substring(1) })'
+
+      rewriteAndExpect(
+        js,
+        `{
+a?.customMethod(function(b) {
+let __datadog_test_0, __datadog_test_1, __datadog_test_2;
+return (__datadog_test_0 = b, __datadog_test_0 == null ? undefined : (__datadog_test_1 = __datadog_test_0, \
+__datadog_test_2 = __datadog_test_1.substring, _ddiast.stringSubstring(__datadog_test_2.call(__datadog_test_1, 1), \
+__datadog_test_2, __datadog_test_1, 1)));
+});
+}`,
+        false
+      )
+    })
   })
 
   describe('Executions', () => {
@@ -308,7 +325,8 @@ __datadog_test_2, __datadog_test_1, 1)));
       'const a = null; return a?.().substring(1)',
       'const a = () => "bbb"; return a?.().substring(1)',
       'const b = { c: "c" }; const a = { substring: () => b }; delete a?.substring().c; return b.c;',
-      'const a = ["1", undefined, "2"]; a?.map(b => b?.substring(1))'
+      'const a = ["1", undefined, "2"]; a?.map(b => b?.substring(1))',
+      'const a = ["1", undefined, "2"]; a?.map(function (b) {return b?.substring(1) })'
     ]
 
     FUNCTION_CONTENTS_TO_TEST.forEach((functionContent) => {
