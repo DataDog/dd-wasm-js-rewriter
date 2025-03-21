@@ -185,6 +185,10 @@ impl Visit for OptChainVisitor<'_> {}
 
 impl VisitMut for OptChainVisitor<'_> {
     /*
+     * Do nothing on expr or spread, for example, method calls arguments
+     */
+    fn visit_mut_expr_or_spread(&mut self, _node: &mut ExprOrSpread) {}
+    /*
      * Iterates the OptChain finding a method to replace.
      *  If the expression contains method to rewrite, all the OptCall or OptMembers are converted
      *  normal Member or Call expressions, and the optional part of the expression is extracted
@@ -234,10 +238,16 @@ impl VisitMut for OptChainVisitor<'_> {
                         }
                     }
                 }
-
                 expr.visit_mut_children_with(self);
             }
-
+            // do nothing and skip in Arrow (() => {}) expressions
+            Expr::Arrow(_) => {}
+            // do nothing and skip in Function (function () {}) expressions
+            Expr::Fn(_) => {}
+            // do nothing and skip in Class (class) expressions
+            Expr::Class(_) => {}
+            // do nothing and skip in Tpl (`template literal`) expressions
+            Expr::Tpl(_) => {}
             _ => {
                 expr.visit_mut_children_with(self);
             }
