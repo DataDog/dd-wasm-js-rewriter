@@ -1267,7 +1267,7 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 [[package]]
 name = "orchestrion-js"
 version = "0.1.0"
-source = "git+ssh://git@github.com/Datadog/orchestrion-js?branch=main#b461e7aa2765ae518c33dc80f03cfca9aa7979dd"
+source = "git+ssh://git@github.com/Datadog/orchestrion-js?branch=main#ac2424933f49df97a5415b3fc5f4e3dc1520709c"
 dependencies = [
  "nodejs-semver",
  "swc",
