@@ -3,7 +3,6 @@
 * This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2022 Datadog, Inc.
 **/
 pub(crate) mod block_transform_utils;
-pub(crate) mod errortracking;
 pub(crate) mod iast;
 pub(crate) mod visitor_utils;
 pub(crate) mod visitor_with_context;

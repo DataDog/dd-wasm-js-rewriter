@@ -6,13 +6,10 @@ use crate::{
     telemetry::TelemetryVerbosity,
     transform::transform_status::{Status, TransformStatus},
     util::{file_name, parse_source_map, FileReader},
-    visitor::{
-        errortracking::errortracking_block_transform_visitor::ErrorTrackingBlockTransformVisitor,
-        iast::{
-            csi_methods::CsiMethods,
-            literal_visitor::{get_literals, LiteralsResult},
-            taint_block_transform_visitor::TaintBlockTransformVisitor,
-        },
+    visitor::iast::{
+        csi_methods::CsiMethods,
+        literal_visitor::{get_literals, LiteralsResult},
+        taint_block_transform_visitor::TaintBlockTransformVisitor,
     },
 };
 use anyhow::{Error, Result};
@@ -75,7 +72,6 @@ pub struct Config {
     pub verbosity: TelemetryVerbosity,
     pub literals: bool,
     pub file_iast_prefix_code: Vec<Stmt>,
-    pub file_errtracking_prefix_code: Vec<Stmt>,
     pub strict: bool,
     pub instrumentor: Option<Instrumentor>,
 }
@@ -161,9 +157,6 @@ pub fn rewrite_js<R: Read>(
         let mut passes: HashSet<TransformPass> = HashSet::new();
         if base_passes.contains(&String::from("iast")) {
             passes.insert(transform_iast);
-        }
-        if base_passes.contains(&String::from("errortracking")) {
-            passes.insert(transform_errortracking);
         }
         if base_passes.contains(&String::from("orchestrion")) {
             passes.insert(transform_orchestrion);
@@ -284,17 +277,6 @@ fn transform_iast(
     _meta: &FileMeta,
 ) {
     let mut block_transform_visitor = TaintBlockTransformVisitor::default(transform_status, config);
-    program.visit_mut_with(&mut block_transform_visitor);
-}
-
-fn transform_errortracking(
-    program: &mut Program,
-    transform_status: &mut TransformStatus,
-    config: &mut Config,
-    _meta: &FileMeta,
-) {
-    let mut block_transform_visitor =
-        ErrorTrackingBlockTransformVisitor::default(transform_status, config);
     program.visit_mut_with(&mut block_transform_visitor);
 }
 
@@ -510,43 +492,6 @@ pub fn generate_iast_prefix_stmts(csi_methods: &CsiMethods) -> Vec<Stmt> {
         let source_file = compiler.cm.new_source_file(
             Arc::new(FileName::Real(PathBuf::from("inline.js".to_string()))),
             final_template.clone(),
-        );
-
-        parse_js(&source_file, handler, &compiler)
-    });
-
-    if let Ok(Program::Script(script)) = program_result {
-        return script.body;
-    }
-
-    Vec::new()
-}
-
-pub fn generate_errtracking_prefix_stmts() -> Vec<Stmt> {
-    let template = String::from(
-        ";
-    if (typeof _dderrortracking === 'undefined') (function(globals) {
-        const noop = (res) => res;
-        globals._dderrortracking = globals._dderrortracking || {
-            record_exception: noop,
-            record_exception_callback: noop
-        };
-    }((1,eval)('this')));
-    ",
-    );
-
-    let compiler = Compiler::new(Arc::new(swc_common::SourceMap::new(
-        FilePathMapping::empty(),
-    )));
-
-    let handler_opts = HandlerOpts {
-        color: ColorConfig::Never,
-        skip_filename: false,
-    };
-    let program_result = try_with_handler(compiler.cm.clone(), handler_opts, |handler| {
-        let source_file = compiler.cm.new_source_file(
-            Arc::new(FileName::Real(PathBuf::from("inline.js".to_string()))),
-            template.clone(),
         );
 
         parse_js(&source_file, handler, &compiler)
