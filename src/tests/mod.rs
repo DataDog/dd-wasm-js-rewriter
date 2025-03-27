@@ -16,10 +16,8 @@ use std::path::PathBuf;
 mod arrow_func_tests;
 mod binary_assignation_test;
 mod binary_expression_test;
-mod error_tracking_tests;
 mod literal_test;
 mod orchestrion_test;
-mod pass_interactions_tests;
 mod source_map_test;
 mod string_method_test;
 mod telemetry_test;
@@ -78,67 +76,11 @@ fn rewrite_js_with_csi_methods(
             verbosity: TelemetryVerbosity::Information,
             literals: false,
             file_iast_prefix_code: Vec::new(),
-            file_errtracking_prefix_code: Vec::new(),
             strict: false,
             instrumentor: None,
         },
         &source_map_reader,
         &vec![String::from("iast")],
-        None,
-        None,
-    )
-}
-
-fn rewrite_js_with_error_tracking(
-    code: String,
-    file: String,
-    prefix: String,
-) -> Result<RewrittenOutput, Error> {
-    let source_map_reader = DefaultFileReader {};
-    crate::rewriter::rewrite_js(
-        code,
-        &file,
-        &mut Config {
-            chain_source_map: false,
-            print_comments: false,
-            local_var_prefix: prefix,
-            csi_methods: CsiMethods::empty(),
-            verbosity: TelemetryVerbosity::Information,
-            literals: false,
-            file_iast_prefix_code: Vec::new(),
-            file_errtracking_prefix_code: Vec::new(),
-            strict: false,
-            instrumentor: None,
-        },
-        &source_map_reader,
-        &[String::from("errortracking")],
-        None,
-        None,
-    )
-}
-
-fn rewrite_js_with_error_tracking_and_iast(
-    code: String,
-    file: String,
-) -> Result<RewrittenOutput, Error> {
-    let source_map_reader = DefaultFileReader {};
-    crate::rewriter::rewrite_js(
-        code,
-        &file,
-        &mut Config {
-            chain_source_map: false,
-            print_comments: false,
-            local_var_prefix: "test".to_string(),
-            csi_methods: get_default_csi_methods(),
-            verbosity: TelemetryVerbosity::Information,
-            literals: false,
-            file_iast_prefix_code: Vec::new(),
-            file_errtracking_prefix_code: Vec::new(),
-            strict: false,
-            instrumentor: None,
-        },
-        &source_map_reader,
-        &[String::from("iast"), String::from("errortracking")],
         None,
         None,
     )
@@ -188,7 +130,6 @@ fn get_default_config_with_verbosity(
         verbosity,
         literals: false,
         file_iast_prefix_code: Vec::new(),
-        file_errtracking_prefix_code: Vec::new(),
         strict: false,
         instrumentor: None,
     }
@@ -203,7 +144,6 @@ fn get_chained_and_print_comments_config() -> Config {
         verbosity: TelemetryVerbosity::Debug,
         literals: false,
         file_iast_prefix_code: Vec::new(),
-        file_errtracking_prefix_code: Vec::new(),
         strict: false,
         instrumentor: None,
     }
@@ -218,7 +158,6 @@ fn get_literals_config() -> Config {
         verbosity: TelemetryVerbosity::Debug,
         literals: true,
         file_iast_prefix_code: Vec::new(),
-        file_errtracking_prefix_code: Vec::new(),
         strict: false,
         instrumentor: None,
     }
