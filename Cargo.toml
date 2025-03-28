@@ -29,7 +29,9 @@ speculoos = "0.11.0"
 ctor = "0.1.23"
 
 [profile.release]
-lto = false
+lto = true
+opt-level = 's'
+codegen-units = 1
 
 [features]
 default = ["instant/wasm-bindgen", "instant/inaccurate"]
