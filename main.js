@@ -6,6 +6,7 @@
 const { getPrepareStackTrace, kSymbolPrepareStackTrace } = require('./js/stack-trace/')
 const { cacheRewrittenSourceMap, getOriginalPathAndLineFromSourceMap } = require('./js/source-map')
 const getNameAndVersion = require('./js/module-details')
+const yaml = require('js-yaml')
 
 class DummyRewriter {
   rewrite (code, file, passes, moduleName, moduleVersion) {
@@ -29,6 +30,10 @@ class NonCacheRewriter {
     } else {
       this.nativeRewriter = new DummyRewriter()
     }
+    if (config?.orchestrion) {
+      const { instrumentations } = yaml.load(config.orchestrion)
+      this.orchestrionModules = new Set(instrumentations.map((i) => i.module_name))
+    }
   }
 
   rewrite (code, file, passes) {
@@ -38,6 +43,9 @@ class NonCacheRewriter {
       const details = getNameAndVersion(file)
       moduleName = details.name
       moduleVersion = details.version
+      if (!this.orchestrionModules.has(moduleName)) {
+        passes.splice(passes.indexOf('orchestrion'), 1)
+      }
     }
     const response = this.nativeRewriter.rewrite(code, file, passes, moduleName, moduleVersion)
 
