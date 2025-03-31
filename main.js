@@ -79,8 +79,8 @@ class NonCacheRewriter {
 }
 
 class CacheRewriter extends NonCacheRewriter {
-  rewrite (code, file, passes, moduleName, moduleVersion) {
-    const response = super.rewrite(code, file, passes, moduleName, moduleVersion)
+  rewrite (code, file, passes) {
+    const response = super.rewrite(code, file, passes)
 
     try {
       const { metrics, content } = response
