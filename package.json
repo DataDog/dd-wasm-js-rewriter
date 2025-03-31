@@ -57,7 +57,7 @@
     "node": ">= 10"
   },
   "scripts": {
-    "build": "wasm-pack build --scope datadog --out-dir wasm --out-name wasm_js_rewriter --target nodejs",
+    "build": "wasm-pack build --scope datadog --out-dir wasm --out-name wasm_js_rewriter --target nodejs -- --no-default-features",
     "format": "run-p format:prettier format:rs",
     "format:prettier": "prettier . -w",
     "format:rs": "cargo fmt",
