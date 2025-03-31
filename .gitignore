@@ -126,4 +126,4 @@ build
 .idea
 .vscode
 
-wasm
+#wasm
