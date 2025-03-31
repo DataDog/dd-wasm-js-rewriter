@@ -31,7 +31,7 @@ ctor = "0.1.23"
 [profile.release]
 lto = true
 opt-level = 's'
-codegen-units = 1
+codegen-units = 8
 
 [features]
 default = ["instant/wasm-bindgen", "instant/inaccurate"]
