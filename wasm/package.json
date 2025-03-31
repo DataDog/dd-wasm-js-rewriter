@@ -1,0 +1,11 @@
+{
+  "name": "@datadog/wasm-js-rewriter",
+  "version": "3.1.0",
+  "files": ["wasm_js_rewriter_bg.wasm", "wasm_js_rewriter.js", "wasm_js_rewriter.d.ts"],
+  "main": "wasm_js_rewriter.js",
+  "types": "wasm_js_rewriter.d.ts",
+  "dependencies": {
+    "lru-cache": "^7.14.0",
+    "node-gyp-build": "^4.5.0"
+  }
+}
