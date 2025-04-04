@@ -463,7 +463,7 @@ fn extract_source_map<R: Read>(
     }
 }
 
-pub fn generate_iast_prefix_stmts(csi_methods: &CsiMethods) -> Vec<Stmt> {
+pub fn generate_prefix_stmts(csi_methods: &CsiMethods) -> Vec<Stmt> {
     let template = ";
     if (typeof _ddiast === 'undefined') (function(globals) {
         const noop = (res) => res;

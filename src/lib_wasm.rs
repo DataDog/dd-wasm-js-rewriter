@@ -5,7 +5,7 @@
 extern crate base64;
 
 use crate::{
-    rewriter::{generate_iast_prefix_stmts, print_js, rewrite_js, Config},
+    rewriter::{generate_prefix_stmts, print_js, rewrite_js, Config},
     telemetry::{Telemetry, TelemetryVerbosity},
     tracer_logger::{self},
     transform::transform_status::TransformStatus,
@@ -99,7 +99,7 @@ impl RewriterConfig {
 
     fn to_config(&self) -> Config {
         let csi_methods = self.get_csi_methods();
-        let file_iast_prefix_code = generate_iast_prefix_stmts(&csi_methods);
+        let file_iast_prefix_code = generate_prefix_stmts(&csi_methods);
 
         Config {
             chain_source_map: self.chain_source_map.unwrap_or(false),
