@@ -15,7 +15,7 @@ const testOptions = {
   ]
 }
 
-const EXPECTED_PREFIX = `;
+const EXPECTED_PREFIX_IAST = `;
 if (typeof _ddiast === 'undefined') (function(globals) {
     const noop = (res)=>res;
     globals._ddiast = globals._ddiast || {
@@ -28,32 +28,32 @@ describe('Initialization prefix', () => {
     it('should not add prefix when the file is not modified', () => {
       const js = 'const a = 12'
 
-      rewriteAndExpectNoTransformation(js, testOptions)
+      rewriteAndExpectNoTransformation(js, ['iast'], testOptions)
     })
 
     it('should add prefix in rewritten files', () => {
       const js = 'a.trim();'
 
-      const rewritten = rewriteAst(wrapBlock(js), testOptions)
+      const rewritten = rewriteAst(wrapBlock(js), ['iast'], testOptions)
 
-      expect(rewritten.startsWith(EXPECTED_PREFIX)).to.be.true
+      expect(rewritten.startsWith(EXPECTED_PREFIX_IAST)).to.be.true
     })
 
     it('should add prefix in rewritten files in ESM modules', () => {
       const js = 'import { a } from "a"; { a.trim() }'
 
-      const rewritten = rewriteAst(js, testOptions)
+      const rewritten = rewriteAst(js, ['iast'], testOptions)
 
-      expect(rewritten.startsWith(EXPECTED_PREFIX)).to.be.true
+      expect(rewritten.startsWith(EXPECTED_PREFIX_IAST)).to.be.true
     })
 
     it("should maintain 'use strict' at the beginning", () => {
       const js = `'use strict'
 function a() { a.trim() }`
 
-      const rewritten = rewriteAst(js, testOptions)
+      const rewritten = rewriteAst(js, ['iast'], testOptions)
 
-      expect(rewritten).to.include(EXPECTED_PREFIX)
+      expect(rewritten).to.include(EXPECTED_PREFIX_IAST)
       expect(rewritten.startsWith("'use strict'")).to.be.true
     })
 
@@ -62,9 +62,9 @@ function a() { a.trim() }`
 import { a } from "a";
 function a() { a.trim() }`
 
-      const rewritten = rewriteAst(js, testOptions)
+      const rewritten = rewriteAst(js, ['iast'], testOptions)
 
-      expect(rewritten).to.include(EXPECTED_PREFIX)
+      expect(rewritten).to.include(EXPECTED_PREFIX_IAST)
       expect(rewritten.startsWith("'use strict'")).to.be.true
     })
 
@@ -73,18 +73,18 @@ function a() { a.trim() }`
 'use strict'
 function a() { a.trim() }`
 
-      const rewritten = rewriteAst(js, testOptions)
+      const rewritten = rewriteAst(js, ['iast'], testOptions)
 
-      expect(rewritten.startsWith(`'use strict';\n${EXPECTED_PREFIX}`)).to.be.true
+      expect(rewritten.startsWith(`'use strict';\n${EXPECTED_PREFIX_IAST}`)).to.be.true
     })
 
     it('should maintain "use strict" at the beginning', () => {
       const js = `"use strict"
 function a() { a.trim() }`
 
-      const rewritten = rewriteAst(js, testOptions)
+      const rewritten = rewriteAst(js, ['iast'], testOptions)
 
-      expect(rewritten.startsWith(`"use strict";\n${EXPECTED_PREFIX}`)).to.be.true
+      expect(rewritten.startsWith(`"use strict";\n${EXPECTED_PREFIX_IAST}`)).to.be.true
     })
 
     it('should maintain "use strict" if it comes after /**/ comment and {comments: true} in config', () => {
@@ -95,9 +95,9 @@ function a() { a.trim() }`
 "use strict"
 function a() { a.trim() }`
 
-      const rewritten = rewriteAst(js, { ...testOptions, comments: true })
+      const rewritten = rewriteAst(js, ['iast'], { ...testOptions, comments: true })
 
-      expect(rewritten.startsWith(`${comment} "use strict";\n${EXPECTED_PREFIX}`)).to.be.true
+      expect(rewritten.startsWith(`${comment} "use strict";\n${EXPECTED_PREFIX_IAST}`)).to.be.true
     })
 
     it('should maintain "use strict" if it comes after // comment and {comments: true} in config', () => {
@@ -106,9 +106,9 @@ function a() { a.trim() }`
 "use strict"
 function a() { a.trim() }`
 
-      const rewritten = rewriteAst(js, { ...testOptions, comments: true })
+      const rewritten = rewriteAst(js, ['iast'], { ...testOptions, comments: true })
 
-      expect(rewritten.startsWith(`${comment}\n"use strict";\n${EXPECTED_PREFIX}`)).to.be.true
+      expect(rewritten.startsWith(`${comment}\n"use strict";\n${EXPECTED_PREFIX_IAST}`)).to.be.true
     })
 
     it('should maintain "use strict" if it comes before // comment and { comments: true } in config', () => {
@@ -117,9 +117,8 @@ function a() { a.trim() }`
 ${comment}
 function a() { a.trim() }`
 
-      const rewritten = rewriteAst(js, { ...testOptions, comments: true })
-
-      expect(rewritten.startsWith(`"use strict";\n${EXPECTED_PREFIX}\n${comment}`)).to.be.true
+      const rewritten = rewriteAst(js, ['iast'], { ...testOptions, comments: true })
+      expect(rewritten.startsWith(`"use strict";\n${EXPECTED_PREFIX_IAST}\n${comment}`)).to.be.true
     })
   })
 
@@ -139,7 +138,7 @@ function a() { a.trim() }`
       const code = `(val) => {
   return val.trim()
 }`
-      const rewrittenCode = rewriteAst(code, testOptions)
+      const rewrittenCode = rewriteAst(code, ['iast'], testOptions)
 
       // eslint-disable-next-line no-eval
       const rewrittenFunction = (1, eval)(rewrittenCode)
@@ -160,7 +159,7 @@ function a() { a.trim() }`
           }
         ]
       }
-      const rewrittenCode = rewriteAst(code, newTestOptions)
+      const rewrittenCode = rewriteAst(code, ['iast'], newTestOptions)
 
       // eslint-disable-next-line no-eval
       const rewrittenFunction = (1, eval)(rewrittenCode)

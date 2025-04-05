@@ -8,7 +8,7 @@ use swc_ecma_visit::swc_ecma_ast::{
     CallExpr, Callee, Expr, ExprOrSpread, Ident, MemberExpr, MemberProp,
 };
 
-use crate::visitor::csi_methods::CsiMethods;
+use crate::visitor::iast::csi_methods::CsiMethods;
 
 pub const PROTOTYPE: &str = "prototype";
 pub const CALL_METHOD_NAME: &str = "call";

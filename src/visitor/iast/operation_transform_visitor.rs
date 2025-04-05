@@ -9,20 +9,17 @@ use swc_ecma_visit::{Visit, VisitMut, VisitMutWith};
 use crate::{
     telemetry::Telemetry,
     transform::{
-        arrow_transform::ArrowTransform,
-        assign_add_transform::AssignAddTransform,
-        binary_add_transform::BinaryAddTransform,
-        call_expr_transform::CallExprTransform,
-        opt_chain_transform::OptChainTransform,
-        template_transform::TemplateTransform,
+        iast::{
+            arrow_transform::ArrowTransform, assign_add_transform::AssignAddTransform,
+            binary_add_transform::BinaryAddTransform, call_expr_transform::CallExprTransform,
+            opt_chain_transform::OptChainTransform, template_transform::TemplateTransform,
+        },
         transform_status::{Status, TransformStatus},
     },
-};
-
-use super::{
-    csi_methods::CsiMethods,
-    ident_provider::IdentProvider,
-    visitor_with_context::{Ctx, VisitorWithContext},
+    visitor::{
+        iast::{csi_methods::CsiMethods, ident_provider::IdentProvider},
+        visitor_with_context::{Ctx, VisitorWithContext},
+    },
 };
 
 pub const ADD_TAG: &str = "+";

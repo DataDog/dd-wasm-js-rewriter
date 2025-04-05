@@ -73,6 +73,14 @@ impl LiteralVisitor {
                     locations: spans
                         .iter()
                         .map(|span_and_ident| {
+                            if span_and_ident.span == Span::default() {
+                                return LiteralLocation {
+                                    ident: span_and_ident.ident.clone(),
+                                    line: 0,
+                                    column: 0,
+                                };
+                            }
+
                             let pos = compiler.cm.lookup_char_pos(span_and_ident.span.lo);
                             LiteralLocation {
                                 ident: span_and_ident.ident.clone(),

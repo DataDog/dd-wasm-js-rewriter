@@ -10,7 +10,10 @@ use crate::{
     tracer_logger::{self},
     transform::transform_status::TransformStatus,
     util::{rnd_string, FileReader},
-    visitor::{self, csi_methods::CsiMethods, literal_visitor::LiteralsResult},
+    visitor::{
+        self,
+        iast::{csi_methods::CsiMethods, literal_visitor::LiteralsResult},
+    },
 };
 use log::{debug, error};
 use serde::{Deserialize, Serialize};
@@ -39,6 +42,8 @@ pub struct RewriterConfig {
     pub csi_methods: Option<Vec<CsiMethod>>,
     pub telemetry_verbosity: Option<String>,
     pub literals: Option<bool>,
+    pub strict: Option<bool>,
+    pub orchestrion: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -67,6 +72,8 @@ impl RewriterConfig {
             csi_methods: None,
             telemetry_verbosity: Some("INFORMATION".to_string()),
             literals: Some(true),
+            strict: Some(false),
+            orchestrion: None,
         }
     }
 
@@ -76,14 +83,14 @@ impl RewriterConfig {
                 &methods
                     .iter()
                     .map(|m| {
-                        visitor::csi_methods::CsiMethod::new(
+                        visitor::iast::csi_methods::CsiMethod::new(
                             m.src.clone(),
                             m.dst.clone(),
                             m.operator.unwrap_or(false),
                             m.allowed_without_callee.unwrap_or(false),
                         )
                     })
-                    .collect::<Vec<visitor::csi_methods::CsiMethod>>(),
+                    .collect::<Vec<visitor::iast::csi_methods::CsiMethod>>(),
             ),
 
             None => CsiMethods::empty(),
@@ -92,7 +99,7 @@ impl RewriterConfig {
 
     fn to_config(&self) -> Config {
         let csi_methods = self.get_csi_methods();
-        let file_prefix_code = generate_prefix_stmts(&csi_methods);
+        let file_iast_prefix_code = generate_prefix_stmts(&csi_methods);
 
         Config {
             chain_source_map: self.chain_source_map.unwrap_or(false),
@@ -104,7 +111,12 @@ impl RewriterConfig {
             csi_methods,
             verbosity: TelemetryVerbosity::parse(self.telemetry_verbosity.clone()),
             literals: self.literals.unwrap_or(true),
-            file_prefix_code,
+            file_iast_prefix_code,
+            strict: self.strict.unwrap_or(false),
+            instrumentor: {
+                let orchestrion = self.orchestrion.clone();
+                orchestrion.map(|config_str| config_str.parse().unwrap())
+            },
         }
     }
 }
@@ -179,33 +191,47 @@ impl Rewriter {
     }
 
     #[wasm_bindgen]
-    pub fn rewrite(&mut self, code: String, file: String) -> anyhow::Result<JsValue, JsError> {
+    pub fn rewrite(
+        &mut self,
+        code: String,
+        file: String,
+        passes: Vec<String>,
+        module_name: Option<String>,
+        module_version: Option<String>,
+    ) -> anyhow::Result<JsValue, JsError> {
         let source_map_reader = WasmFileReader {};
+        rewrite_js(
+            code,
+            &file,
+            &mut self.config,
+            &source_map_reader,
+            &passes,
+            module_name.as_deref(),
+            module_version.as_deref(),
+        )
+        .map(|result| Result {
+            content: print_js(
+                &result.code,
+                &result.source_map,
+                &result.original_source_map,
+                &self.config,
+            )
+            .into_owned(),
+            metrics: get_metrics(result.transform_status, &file),
+            literals_result: result.literals_result,
+        })
+        .as_ref()
+        .map(|result| {
+            let status = &result.metrics;
+            debug!("Rewritten {file}\n status {status:?}");
 
-        rewrite_js(code, &file, &self.config, &source_map_reader)
-            .map(|result| Result {
-                content: print_js(
-                    &result.code,
-                    &result.source_map,
-                    &result.original_source_map,
-                    &self.config,
-                )
-                .into_owned(),
-                metrics: get_metrics(result.transform_status, &file),
-                literals_result: result.literals_result,
-            })
-            .as_ref()
-            .map(|result| {
-                let status = &result.metrics;
-                debug!("Rewritten {file}\n status {status:?}");
-
-                serde_wasm_bindgen::to_value(result).unwrap()
-            })
-            .map_err(|e| {
-                let error_msg = format!("{e}");
-                error!("Error rewriting {}: {}", &file, &error_msg);
-                JsError::new(&error_msg)
-            })
+            serde_wasm_bindgen::to_value(result).unwrap()
+        })
+        .map_err(|e| {
+            let error_msg = format!("{e}");
+            error!("Error rewriting {}: {}", &file, &error_msg);
+            JsError::new(&error_msg)
+        })
     }
 
     #[wasm_bindgen(js_name = csiMethods)]

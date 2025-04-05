@@ -19,9 +19,9 @@ const { generateSourceMapFromFileContent } = require('../js/source-map')
 
 describe('rewriter configuration', () => {
   describe('csi exclusions', () => {
-    const rewriteAndExpectWithCsiMethods = function (js, expect, csiMethods) {
-      const rewriter = new Rewriter({ csiMethods, localVarPrefix: 'test' })
-      return rewriteAndExpect(js, expect, false, { rewriter })
+    const rewriteAndExpectWithCsiMethods = function (js, expect, passes, csiMethods) {
+      const rewriter = new Rewriter({ csiMethods, localVarPrefix: 'test' }, ['iast'])
+      return rewriteAndExpect(js, expect, passes, false, { rewriter })
     }
 
     const onlySubstringCsiMethod = [{ src: 'substring', dst: 'string_substring' }]
@@ -34,7 +34,7 @@ describe('rewriter configuration', () => {
     it('does not rewrite excluded method', () => {
       const rewriter = new Rewriter()
       const js = 'const result = a.concat("b");'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does rewrite method and keep excluded', () => {
@@ -46,6 +46,7 @@ describe('rewriter configuration', () => {
 const result = (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.substring, _ddiast.string_substring(\
 __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2)).concat("b");
       }`,
+        ['iast'],
         onlySubstringCsiMethod
       )
     })
@@ -53,26 +54,26 @@ __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 
     it('does not rewrite multiple excluded methods', () => {
       const rewriter = new Rewriter()
       const js = 'const result = a.substring(2).concat("b");'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does not rewrite + operation', () => {
       const rewriter = new Rewriter()
       const js = 'const result = a.concat("b" + c);'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does not rewrite += operation', () => {
       const rewriter = new Rewriter()
       const js = 'result += a.concat("b");'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does not rewrite template literals operation', () => {
       const rewriter = new Rewriter()
       // eslint-disable-next-line no-template-curly-in-string
       const js = 'const result = `hello ${a}`'
-      rewriteAndExpectNoTransformation(js, { rewriter })
+      rewriteAndExpectNoTransformation(js, ['iast'], { rewriter })
     })
 
     it('does rewrite + with altenative dst name and substring and keep excluded', () => {
@@ -85,6 +86,7 @@ const result = (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.substr
 __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2)).concat(\
 _ddiast.plus("b" + c, "b", c));
       }`,
+        ['iast'],
         plusOperatorAndOthersCsiMethods
       )
     })
@@ -99,6 +101,7 @@ const result = (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.custom
 __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2)).concat(\
 _ddiast.plus("b" + c, "b", c));
       }`,
+        ['iast'],
         plusOperatorAndOthersCsiMethods
       )
     })
@@ -113,6 +116,7 @@ const result = (__datadog_test_0 = a, __datadog_test_1 = Whatever.prototype.cust
 __datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2)).concat(\
 _ddiast.plus("b" + c, "b", c));
       }`,
+        ['iast'],
         plusOperatorAndOthersCsiMethods
       )
     })
@@ -143,7 +147,7 @@ _ddiast.plus("b" + c, "b", c));
   describe('telemetry verbosity', () => {
     it('should accept OFF verbosity', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'OFF' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -156,7 +160,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should accept MANDATORY verbosity', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'MANDATORY' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -169,7 +173,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should accept INFORMATION verbosity', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'INFORMATION' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -182,7 +186,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should accept DEBUG verbosity', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'DEBUG' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -196,7 +200,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should accept unknown verbosity and set it as INFORMATION', () => {
       const rewriter = new Rewriter({ csiMethods, telemetryVerbosity: 'unknown' })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -208,7 +212,7 @@ _ddiast.plus("b" + c, "b", c));
 
     it('should apply Information verbosity as default', () => {
       const rewriter = new Rewriter({ csiMethods })
-      const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+      const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
       expect(response).to.have.property('content')
       expect(response).to.have.property('metrics')
 
@@ -224,7 +228,7 @@ _ddiast.plus("b" + c, "b", c));
     describe('rewrite method', () => {
       it('should have same return type as Rewriter.rewrite', () => {
         const rewriter = new DummyRewriter()
-        const response = rewriter.rewrite('{const a = b + c}', 'index.js')
+        const response = rewriter.rewrite('{const a = b + c}', 'index.js', ['iast'])
         expect(response).to.have.property('content')
       })
     })
@@ -235,7 +239,7 @@ _ddiast.plus("b" + c, "b", c));
       const rewriter = new Rewriter({ csiMethods })
 
       const resource = resourceFile('sourcemap', 'StrUtil_external.js')
-      const result = rewriter.rewrite(resource.content, resource.filename)
+      const result = rewriter.rewrite(resource.content, resource.filename, ['iast'])
 
       const content = result.content
       expect(content).to.not.undefined
@@ -252,7 +256,7 @@ _ddiast.plus("b" + c, "b", c));
       const rewriter = new Rewriter({ csiMethods, chainSourceMap: true })
 
       const resource = resourceFile('sourcemap', 'StrUtil_external.js')
-      const result = rewriter.rewrite(resource.content, resource.filename)
+      const result = rewriter.rewrite(resource.content, resource.filename, ['iast'])
 
       const content = result.content
       expect(content).to.not.undefined

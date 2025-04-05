@@ -5,15 +5,16 @@
 use swc_common::Spanned;
 use swc_ecma_ast::*;
 
-use crate::visitor::{
-    csi_methods::CsiMethods,
-    ident_provider::{IdentKind, IdentProvider},
-    visitor_util::get_dd_paren_expr,
-};
-
-use super::{
-    operand_handler::{DefaultOperandHandler, ExpandArrays, IdentMode, OperandHandler},
-    transform_status::TransformResult,
+use super::operand_handler::{DefaultOperandHandler, ExpandArrays, IdentMode, OperandHandler};
+use crate::{
+    transform::transform_status::TransformResult,
+    visitor::{
+        iast::{
+            csi_methods::CsiMethods,
+            ident_provider::{IdentKind, IdentProvider},
+        },
+        visitor_utils::get_dd_paren_expr,
+    },
 };
 
 pub struct TemplateTransform {}

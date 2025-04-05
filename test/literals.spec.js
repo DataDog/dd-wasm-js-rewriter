@@ -13,7 +13,7 @@ const FILE_PATH = path.join(process.cwd(), 'index.spec.js')
 describe('hardcoded literals', () => {
   it('does double quoted literals found', () => {
     const js = 'const secret = "this_is_a_secret";'
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.file).to.be.eq(FILE_PATH)
@@ -24,7 +24,7 @@ describe('hardcoded literals', () => {
 
   it('does not found literals if disabled by conf', () => {
     const js = 'const secret = "this_is_a_secret";'
-    const result = rewriteWithOpts(js, {
+    const result = rewriteWithOpts(js, ['iast'], {
       literals: false
     })
 
@@ -33,7 +33,7 @@ describe('hardcoded literals', () => {
 
   it('does return single quoted literals found', () => {
     const js = "const secret = 'this_is_a_secret';"
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.file).to.be.eq(FILE_PATH)
@@ -49,7 +49,7 @@ describe('hardcoded literals', () => {
     */
 
     const secret = 'this_is_a_secret';`
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.file).to.be.eq(FILE_PATH)
@@ -60,7 +60,7 @@ describe('hardcoded literals', () => {
 
   it('does return multiple literals found', () => {
     const js = "const secret1 = 'this_is_a_secret'; const secret2 = 'another_secret'"
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.literals).to.deep.include({
@@ -75,7 +75,7 @@ describe('hardcoded literals', () => {
 
   it('does return literals found inside a block', () => {
     const js = "function auth() { const secret = 'this_is_a_secret'; }"
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.literals).to.deep.eq([
@@ -85,7 +85,7 @@ describe('hardcoded literals', () => {
 
   it('does return parameter literals in a call', () => {
     const js = "function login() { return auth('this_is_a_secret'); }"
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.literals).to.deep.eq([
@@ -95,7 +95,7 @@ describe('hardcoded literals', () => {
 
   it('does return literals in an object definition with ident as key', () => {
     const js = "const TOKENS = { secret: 'this_is_a_secret' }"
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.literals).to.deep.eq([
@@ -105,7 +105,7 @@ describe('hardcoded literals', () => {
 
   it('does return literals in an object definition without ident', () => {
     const js = "const TOKENS = { [secret]: 'this_is_a_secret' }"
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.literals).to.deep.eq([
@@ -115,7 +115,7 @@ describe('hardcoded literals', () => {
 
   it('does not return literals with less or eq than 8 chars length', () => {
     const js = 'const secret = "12345678";'
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
     expect(result.literalsResult.literals).to.deep.eq([])
@@ -123,7 +123,7 @@ describe('hardcoded literals', () => {
 
   it('does not fail with an empty regexp constructor', () => {
     const js = 'const reg = new RegExp();'
-    const result = rewriteWithOpts(js)
+    const result = rewriteWithOpts(js, ['iast'])
 
     expect(result.literalsResult).to.not.undefined
   })
