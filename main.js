@@ -47,6 +47,9 @@ class NonCacheRewriter {
         passes.splice(passes.indexOf('orchestrion'), 1)
       }
     }
+    if (passes.length === 0) {
+      return { content: code }
+    }
     const response = this.nativeRewriter.rewrite(code, file, passes, moduleName, moduleVersion)
 
     // rewrite returns an empty content when for the 'notmodified' status

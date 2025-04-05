@@ -49,7 +49,27 @@ struct FileMeta<'a> {
     filename: &'a PathBuf,
 }
 
-type TransformPass = fn(&mut Program, &mut TransformStatus, &mut Config, &FileMeta);
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+// #[serde(rename_all = "snake_case")]
+pub enum TransformPass {
+    Iast,
+    Orchestrion,
+}
+
+impl TransformPass {
+    fn transform(
+        &self,
+        program: &mut Program,
+        transform_status: &mut TransformStatus,
+        config: &mut Config,
+        meta: &FileMeta,
+    ) {
+        match self {
+            Self::Iast => transform_iast(program, transform_status, config),
+            Self::Orchestrion => transform_orchestrion(program, transform_status, config, meta),
+        }
+    }
+}
 
 pub struct RewrittenOutput {
     pub code: String,
@@ -156,10 +176,10 @@ pub fn rewrite_js<R: Read>(
 
         let mut passes: HashSet<TransformPass> = HashSet::new();
         if base_passes.contains(&String::from("iast")) {
-            passes.insert(transform_iast);
+            passes.insert(TransformPass::Iast);
         }
         if base_passes.contains(&String::from("orchestrion")) {
-            passes.insert(transform_orchestrion);
+            passes.insert(TransformPass::Orchestrion);
         }
         let meta = FileMeta {
             module_name,
@@ -256,8 +276,8 @@ fn apply_transformation_passes(
 
     if let Some(pass_to_remove) = passes
         .iter()
-        .find(|&&pass| {
-            pass(&mut program, &mut transform_status, config, &meta);
+        .find(|&pass| {
+            pass.transform(&mut program, &mut transform_status, config, &meta);
             transform_status.status == Status::Cancelled
         })
         .cloned()
@@ -274,7 +294,6 @@ fn transform_iast(
     program: &mut Program,
     transform_status: &mut TransformStatus,
     config: &mut Config,
-    _meta: &FileMeta,
 ) {
     let mut block_transform_visitor = TaintBlockTransformVisitor::default(transform_status, config);
     program.visit_mut_with(&mut block_transform_visitor);
