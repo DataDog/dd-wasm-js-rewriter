@@ -6,7 +6,6 @@
 /* eslint-disable no-unused-expressions */
 'use strict'
 
-require('./setup.js')
 const { Rewriter } = require('./util')
 
 describe('logger', () => {

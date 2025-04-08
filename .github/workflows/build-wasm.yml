@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18'
       - run: node scripts/version-checker.js
       - run: node scripts/check_licenses.js
 
@@ -48,10 +48,10 @@ jobs:
         target:
           - name: linux 64 bits
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18'
       - run: |
           cargo install wasm-pack
           npm ci --ignore-scripts
@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
       - run: npm ci
       - run: npm run ${{ matrix.run }}
 
@@ -103,10 +103,10 @@ jobs:
     env:
       NPM_REWRITER: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18'
           architecture: ${{ matrix.target.arch }}
       - run: npm ci --ignore-scripts
       - uses: codex-team/action-nodejs-package-info@v1.1
@@ -135,10 +135,10 @@ jobs:
           - name: alpine 64 bits
             dockerfile: test.alpine.Dockerfile
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18'
       - uses: codex-team/action-nodejs-package-info@v1.1
         id: package
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
@@ -158,7 +158,7 @@ jobs:
     needs: ['wasm-pack']
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: codex-team/action-nodejs-package-info@v1.1
         id: package
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
@@ -167,7 +167,7 @@ jobs:
 
       - name: Restore v8 builder Image
         id: cache-docker-v8
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ci/cache/docker/v8builder
           key: cache-docker-v8builder-${{ env.V8_BRANCH }}
