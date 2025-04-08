@@ -288,6 +288,7 @@ __datadog_test_2 = __datadog_test_1.substring, _ddiast.stringSubstring(__datadog
 __datadog_test_2, __datadog_test_1, 1)));
 });
 }`,
+        ['iast'],
         false
       )
     })
@@ -305,6 +306,7 @@ __datadog_test_2 = __datadog_test_1.substring, _ddiast.stringSubstring(__datadog
 __datadog_test_2, __datadog_test_1, 1)));
 });
 }`,
+        ['iast'],
         false
       )
     })
@@ -324,6 +326,7 @@ __datadog_test_2, __datadog_test_1, 1)));
 }
 });
 }`,
+        ['iast'],
         false
       )
     })
@@ -342,6 +345,7 @@ a?.method((__datadog_test_3 = (__datadog_test_0 = b, __datadog_test_0 == null ? 
 __datadog_test_2.call(__datadog_test_1), __datadog_test_2, __datadog_test_1))), \
 _ddiast.tplOperator(\`\${__datadog_test_3}\`, __datadog_test_3)));
 }`,
+        ['iast'],
         false
       )
     })
@@ -357,6 +361,7 @@ a?.method((__datadog_test_0 = b, __datadog_test_0 == null ? undefined : \
 (__datadog_test_1 = __datadog_test_0, __datadog_test_2 = __datadog_test_1.trim, _ddiast.trim(\
 __datadog_test_2.call(__datadog_test_1), __datadog_test_2, __datadog_test_1))));
 }`,
+        ['iast'],
         false
       )
     })
@@ -373,6 +378,7 @@ let __datadog_test_0, __datadog_test_1, __datadog_test_2, __datadog_test_3;
 _ddiast.trim(__datadog_test_2.call(__datadog_test_1, __datadog_test_3), __datadog_test_2, __datadog_test_1, \
 __datadog_test_3)));
 }`,
+        ['iast'],
         false
       )
     })
