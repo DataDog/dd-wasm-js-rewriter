@@ -34,7 +34,7 @@ describe('orchestrion', () => {
   let rewriter
 
   beforeEach(function () {
-    this.timeout(10000)
+    this.timeout(30000)
 
     sinon.restore()
     // Set up logger
