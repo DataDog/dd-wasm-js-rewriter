@@ -198,7 +198,7 @@ crawl(options.rootPath, options, {
 
         const start = process.hrtime.bigint()
 
-        const response = rewriter.rewrite(code, path)
+        const response = rewriter.rewrite(code, path, ['iast'])
         let rewritten = response.content
 
         green(`     -> ${fileName}`)

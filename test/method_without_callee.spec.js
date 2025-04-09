@@ -11,7 +11,8 @@ describe('Method without callee', () => {
 let __datadog_test_0;
 (__datadog_test_0 = arg0, _ddiast.aloneMethod\
 (aloneMethod(__datadog_test_0), aloneMethod, undefined, __datadog_test_0));
-}`
+}`,
+      ['iast']
     )
   })
 
@@ -23,7 +24,8 @@ let __datadog_test_0;
 let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = arg0, __datadog_test_1 = obj.arg1, _ddiast.aloneMethod\
 (aloneMethod(__datadog_test_0, __datadog_test_1), aloneMethod, undefined, __datadog_test_0, __datadog_test_1));
-}`
+}`,
+      ['iast']
     )
   })
   it('should rewrite aloneMethod without args', () => {
@@ -32,7 +34,8 @@ let __datadog_test_0, __datadog_test_1;
       js,
       `{
 _ddiast.aloneMethod(aloneMethod(), aloneMethod, undefined);
-}`
+}`,
+      ['iast']
     )
   })
 
@@ -44,12 +47,13 @@ _ddiast.aloneMethod(aloneMethod(), aloneMethod, undefined);
 let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_0 = obj, __datadog_test_1 = __datadog_test_0.aloneMethod, __datadog_test_2 = arg0, _ddiast.aloneMethod\
 (__datadog_test_1.call(__datadog_test_0, __datadog_test_2), __datadog_test_1, __datadog_test_0, __datadog_test_2));
-}`
+}`,
+      ['iast']
     )
   })
 
   it('should not rewrite method not configured as alone when it is used alone', () => {
     const js = 'cantAloneMethod(arg0)'
-    rewriteAndExpect(js, '{cantAloneMethod(arg0)}')
+    rewriteAndExpect(js, '{cantAloneMethod(arg0)}', ['iast'])
   })
 })

@@ -48,7 +48,7 @@ const csiMethods = [
   { src: 'cantAloneMethod' }
 ]
 
-const rewriteWithOpts = (code, opts) => {
+const rewriteWithOpts = (code, passes, opts) => {
   opts = Object.assign(
     {
       localVarPrefix: 'test',
@@ -60,11 +60,11 @@ const rewriteWithOpts = (code, opts) => {
 
   const rewriter = opts.rewriter ?? new Rewriter(opts)
   const file = opts.file ?? path.join(process.cwd(), 'index.spec.js')
-  return rewriter.rewrite(code, file)
+  return rewriter.rewrite(code, file, passes)
 }
 
-const rewriteAst = (code, opts) => {
-  const rewritten = rewriteWithOpts(code, opts)
+const rewriteAst = (code, passes, opts) => {
+  const rewritten = rewriteWithOpts(code, passes, opts)
   let content = rewritten.content
   if (opts) {
     if (!opts.keepSourceMap) {
@@ -83,20 +83,20 @@ const rewriteAst = (code, opts) => {
 
 const wrapBlock = (code) => `{${os.EOL}${code}${os.EOL}}`
 
-const rewriteAndExpectNoTransformation = (code, opts) => {
-  return rewriteAndExpect(wrapBlock(code), wrapBlock(code), true, opts)
+const rewriteAndExpectNoTransformation = (code, passes, opts) => {
+  return rewriteAndExpect(wrapBlock(code), wrapBlock(code), passes, true, opts)
 }
 
-const rewriteAndExpect = (code, expect, block, opts) => {
+const rewriteAndExpect = (code, expect, passes, block, opts) => {
   code = !block ? `{${code}}` : code
-  const rewritten = rewriteAst(code, opts)
+  const rewritten = rewriteAst(code, passes, opts)
   expectAst(rewritten, expect)
   return rewritten
 }
 
-const rewriteAndExpectError = (code) => {
+const rewriteAndExpectError = (code, passes) => {
   expect(() => {
-    rewriteAndExpect(code, code)
+    rewriteAndExpect(code, code, passes)
   }).to.throw(Error, /Variable name duplicated/)
 }
 
@@ -124,10 +124,9 @@ const expectAst = (received, expected) => {
   expect(rLines).to.be.eq(eLines)
 }
 
-const rewriteAndExpectAndExpectEval = (js, expected) => {
+const rewriteAndExpectAndExpectEval = (js, expected, passes) => {
   const rewriter = new Rewriter({ localVarPrefix: 'test', csiMethods, telemetryVerbosity: TELEMETRY_VERBOSITY })
-  rewriteAndExpect(js, expected, true, { rewriter })
-
+  rewriteAndExpect(js, expected, passes, true, { rewriter })
   const globalMethods = getGlobalMethods(rewriter.csiMethods())
 
   // eslint-disable-next-line no-eval

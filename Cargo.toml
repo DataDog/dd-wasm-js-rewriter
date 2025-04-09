@@ -7,7 +7,7 @@ version = "3.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-swc = "15.0.0"
+swc = "16.1.0"
 swc_common = "8.0.0"
 swc_ecma_ast = "8.0.0"
 swc_ecma_visit = "8.0.0"
@@ -22,6 +22,8 @@ serde-wasm-bindgen = "0.4"
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.63"
 log = {version = "0.4", features = ["std"] }
+orchestrion-js = { git = "https://github.com/Datadog/orchestrion-js", branch = "main" }
+regex = "1.11.1"
 
 [dev-dependencies]
 tempfile = "3.3.0"

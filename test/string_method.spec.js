@@ -12,7 +12,7 @@ describe('String method', () => {
   describe('substring', () => {
     it('does not modify literal substring', () => {
       const js = '"a".substring(1);'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does modify substring', () => {
@@ -22,7 +22,8 @@ describe('String method', () => {
         `{
   let __datadog_test_0, __datadog_test_1;
   (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.substring, _ddiast.stringSubstring(__datadog_test_1\
-.call(__datadog_test_0, 1), __datadog_test_1, __datadog_test_0, 1));\n}`
+.call(__datadog_test_0, 1), __datadog_test_1, __datadog_test_0, 1));\n}`,
+        ['iast']
       )
     })
 
@@ -34,7 +35,8 @@ describe('String method', () => {
   let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.substring, __datadog_test_2 = a.lenght - 2, \
 _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 1, __datadog_test_2), __datadog_test_1, \
-__datadog_test_0, 1, __datadog_test_2));\n}`
+__datadog_test_0, 1, __datadog_test_2));\n}`,
+        ['iast']
       )
     })
 
@@ -45,7 +47,8 @@ __datadog_test_0, 1, __datadog_test_2));\n}`
         `{
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = a(), __datadog_test_1 = __datadog_test_0.substring, _ddiast.stringSubstring(__datadog_test_1\
-.call(__datadog_test_0, 1), __datadog_test_1, __datadog_test_0, 1));\n}`
+.call(__datadog_test_0, 1), __datadog_test_1, __datadog_test_0, 1));\n}`,
+        ['iast']
       )
     })
 
@@ -57,7 +60,8 @@ __datadog_test_0, 1, __datadog_test_2));\n}`
   let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_0 = a(), __datadog_test_1 = __datadog_test_0.substring, __datadog_test_2 = b, \
 _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, __datadog_test_2), __datadog_test_1, __datadog_test_0\
-, __datadog_test_2));\n}`
+, __datadog_test_2));\n}`,
+        ['iast']
       )
     })
 
@@ -69,7 +73,8 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, __datadog_test_2
   let __datadog_test_0, __datadog_test_1, __datadog_test_2;
 (__datadog_test_0 = a(), __datadog_test_1 = __datadog_test_0.substring, __datadog_test_2 = b(), \
 _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, __datadog_test_2), __datadog_test_1, \
-__datadog_test_0, __datadog_test_2));\n}`
+__datadog_test_0, __datadog_test_2));\n}`,
+        ['iast']
       )
     })
 
@@ -82,13 +87,14 @@ __datadog_test_0, __datadog_test_2));\n}`
 (__datadog_test_2 = a(), __datadog_test_3 = __datadog_test_2.substring, __datadog_test_4 = (__datadog_test_0 = c, \
 __datadog_test_1 = b(), _ddiast.plusOperator(__datadog_test_0 + __datadog_test_1, __datadog_test_0, __datadog_test_1))\
 , _ddiast.stringSubstring(__datadog_test_3.call(__datadog_test_2, __datadog_test_4), __datadog_test_3, \
-__datadog_test_2, __datadog_test_4));\n}`
+__datadog_test_2, __datadog_test_4));\n}`,
+        ['iast']
       )
     })
 
     it('does not modify literal String.prototype.substring.call', () => {
       const js = 'String.prototype.substring.call("hello", 2);'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does modify String.prototype.substring.call', () => {
@@ -98,7 +104,8 @@ __datadog_test_2, __datadog_test_4));\n}`
         `{
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = b, __datadog_test_1 = String.prototype.substring, _ddiast.stringSubstring(__datadog_test_1\
-.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2));\n}`
+.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2));\n}`,
+        ['iast']
       )
     })
 
@@ -109,7 +116,8 @@ __datadog_test_2, __datadog_test_4));\n}`
         `{
   let __datadog_test_0, __datadog_test_1;
   (__datadog_test_0 = _ddiast.plusOperator(b + c, b, c), __datadog_test_1 = String.prototype.substring, \
-_ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2));\n}`
+_ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_test_1, __datadog_test_0, 2));\n}`,
+        ['iast']
       )
     })
 
@@ -121,7 +129,8 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_te
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = b, __datadog_test_1 = String.prototype.substring, _ddiast.stringSubstring(__datadog_test_1\
 .call(__datadog_test_0), __datadog_test_1, __datadog_test_0));
-      }`
+      }`,
+        ['iast']
       )
     })
 
@@ -132,7 +141,8 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_te
         `{
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = b, __datadog_test_1 = String.prototype.substring, _ddiast.stringSubstring(__datadog_test_1\
-.apply(__datadog_test_0, [\n2\n]), __datadog_test_1, __datadog_test_0, 2));\n}`
+.apply(__datadog_test_0, [\n2\n]), __datadog_test_1, __datadog_test_0, 2));\n}`,
+        ['iast']
       )
     })
 
@@ -144,28 +154,29 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_te
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = b, __datadog_test_1 = String.prototype.substring, _ddiast.stringSubstring(__datadog_test_1\
 .apply(__datadog_test_0, [\n2\n], 1), __datadog_test_1, __datadog_test_0, 2, 1));
-      }`
+      }`,
+        ['iast']
       )
     })
 
     it('does not modify String.prototype.substring.apply with incorrect arguments', () => {
       const js = 'String.prototype.substring.apply(b, 2);'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does not modify String.prototype.substring.apply with incorrect arguments', () => {
       const js = 'String.prototype.substring.apply();'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does not modify String.prototype.substring direct call', () => {
       const js = 'String.prototype.substring(1);'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does not modify String.prototype.substring direct call', () => {
       const js = 'String.prototype.substring.call("abc", 0, a);'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does modify member.prop.substring call', () => {
@@ -176,7 +187,8 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_te
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = a.b.c, __datadog_test_1 = __datadog_test_0.substring, _ddiast.stringSubstring(__datadog_test_1\
 .call(__datadog_test_0, 1), __datadog_test_1, __datadog_test_0, 1));
-      }`
+      }`,
+        ['iast']
       )
     })
 
@@ -188,7 +200,8 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_te
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = a.b().c, __datadog_test_1 = __datadog_test_0.substring, _ddiast.stringSubstring(__datadog_test_1\
 .call(__datadog_test_0, 1), __datadog_test_1, __datadog_test_0, 1));
-      }`
+      }`,
+        ['iast']
       )
     })
 
@@ -200,7 +213,8 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_te
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = a.b.c(), __datadog_test_1 = __datadog_test_0.substring, _ddiast.stringSubstring(__datadog_test_1\
 .call(__datadog_test_0, 1), __datadog_test_1, __datadog_test_0, 1));
-      }`
+      }`,
+        ['iast']
       )
     })
   })
@@ -208,12 +222,12 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_te
   describe('concat (method that allows literals)', () => {
     it('does not modify String.prototype.concat call if all args are literals', () => {
       const js = 'String.prototype.concat.call("hello", "world");'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does modify String.prototype.concat call if args are literals and null', () => {
       const js = 'String.prototype.concat.call("hello", 2, undefined, null);'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does modify String.prototype.concat call if some ident', () => {
@@ -225,13 +239,14 @@ _ddiast.stringSubstring(__datadog_test_1.call(__datadog_test_0, 2), __datadog_te
 (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = a, _ddiast.concat(\
 __datadog_test_0.call("hello", __datadog_test_1, "world"), __datadog_test_0, "hello", \
 __datadog_test_1, "world"));
-      }`
+      }`,
+        ['iast']
       )
     })
 
     it('does not modify String.prototype.concat apply if all args are literals', () => {
       const js = 'String.prototype.concat.apply("hello", ["world", null, "moon"]);'
-      rewriteAndExpectNoTransformation(js)
+      rewriteAndExpectNoTransformation(js, ['iast'])
     })
 
     it('does modify String.prototype.concat apply if this is not a literal', () => {
@@ -242,7 +257,8 @@ __datadog_test_1, "world"));
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = a, __datadog_test_1 = String.prototype.concat, _ddiast.concat(__datadog_test_1.apply(\
 __datadog_test_0, [\n"world",\nnull\n]), __datadog_test_1, __datadog_test_0, "world", null));
-      }`
+      }`,
+        ['iast']
       )
     })
 
@@ -254,7 +270,8 @@ __datadog_test_0, [\n"world",\nnull\n]), __datadog_test_1, __datadog_test_0, "wo
   let __datadog_test_0, __datadog_test_1;
 (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = a, _ddiast.concat(__datadog_test_0.apply(\
 null, [\n"world",\n__datadog_test_1\n]), __datadog_test_0, null, "world", __datadog_test_1));
-      }`
+      }`,
+        ['iast']
       )
     })
 
@@ -267,7 +284,8 @@ null, [\n"world",\n__datadog_test_1\n]), __datadog_test_0, null, "world", __data
 (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = a, \
 _ddiast.concat(__datadog_test_0.apply("hello", [\n"world",\n__datadog_test_1\n]), __datadog_test_0, \
 "hello", "world", __datadog_test_1));
-      }`
+      }`,
+        ['iast']
       )
     })
 
@@ -279,7 +297,8 @@ _ddiast.concat(__datadog_test_0.apply("hello", [\n"world",\n__datadog_test_1\n])
           js,
           builder.build(`let __datadog_test_0, __datadog_test_1;
         return (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = [\n        ...a\n    ], _ddiast.concat(\
-__datadog_test_0.call(...__datadog_test_1), __datadog_test_0, ...__datadog_test_1));`)
+__datadog_test_0.call(...__datadog_test_1), __datadog_test_0, ...__datadog_test_1));`),
+          ['iast']
         )
       })
 
@@ -291,7 +310,8 @@ __datadog_test_0.call(...__datadog_test_1), __datadog_test_0, ...__datadog_test_
           builder.build(`let __datadog_test_0, __datadog_test_1, __datadog_test_2;
         return (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = [\n        ...a\n    ], \
 __datadog_test_2 = [\n        ...b\n    ], _ddiast.concat(__datadog_test_0.call(...__datadog_test_1, \
-...__datadog_test_2), __datadog_test_0, ...__datadog_test_1, ...__datadog_test_2));`)
+...__datadog_test_2), __datadog_test_0, ...__datadog_test_1, ...__datadog_test_2));`),
+          ['iast']
         )
       })
 
@@ -302,7 +322,8 @@ __datadog_test_2 = [\n        ...b\n    ], _ddiast.concat(__datadog_test_0.call(
           js,
           builder.build(`let __datadog_test_0, __datadog_test_1;
         return (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = [\n        ...a\n    ], _ddiast.concat(\
-__datadog_test_0.call("hello", ...__datadog_test_1), __datadog_test_0, "hello", ...__datadog_test_1));`)
+__datadog_test_0.call("hello", ...__datadog_test_1), __datadog_test_0, "hello", ...__datadog_test_1));`),
+          ['iast']
         )
       })
 
@@ -314,7 +335,8 @@ __datadog_test_0.call("hello", ...__datadog_test_1), __datadog_test_0, "hello", 
           builder.build(`let __datadog_test_0, __datadog_test_1, __datadog_test_2;
         return (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = \
 [\n        ...a\n    ], __datadog_test_2 = [\n        ...b\n    ], _ddiast.concat(__datadog_test_0.call("hello", \
-...__datadog_test_1, ...__datadog_test_2), __datadog_test_0, "hello", ...__datadog_test_1, ...__datadog_test_2));`)
+...__datadog_test_1, ...__datadog_test_2), __datadog_test_0, "hello", ...__datadog_test_1, ...__datadog_test_2));`),
+          ['iast']
         )
       })
 
@@ -325,7 +347,8 @@ __datadog_test_0.call("hello", ...__datadog_test_1), __datadog_test_0, "hello", 
           js,
           builder.build(`let __datadog_test_0, __datadog_test_1;
         return (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = [\n        ...a\n    ], _ddiast.concat(\
-__datadog_test_0.apply("hello", ...__datadog_test_1), __datadog_test_0, "hello", ...__datadog_test_1));`)
+__datadog_test_0.apply("hello", ...__datadog_test_1), __datadog_test_0, "hello", ...__datadog_test_1));`),
+          ['iast']
         )
       })
 
@@ -336,7 +359,8 @@ __datadog_test_0.apply("hello", ...__datadog_test_1), __datadog_test_0, "hello",
           js,
           builder.build(`let __datadog_test_0, __datadog_test_1;
         return (__datadog_test_0 = String.prototype.concat, __datadog_test_1 = [\n        ...a\n    ], _ddiast.concat(\
-__datadog_test_0.apply(...__datadog_test_1), __datadog_test_0, ...__datadog_test_1));`)
+__datadog_test_0.apply(...__datadog_test_1), __datadog_test_0, ...__datadog_test_1));`),
+          ['iast']
         )
       })
 
@@ -348,7 +372,8 @@ __datadog_test_0.apply(...__datadog_test_1), __datadog_test_0, ...__datadog_test
           builder.build(`let __datadog_test_0, __datadog_test_1, __datadog_test_2;
         return (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.concat, __datadog_test_2 = \
 [\n        ...b\n    ], _ddiast.concat(__datadog_test_1.call(__datadog_test_0, "world", ...__datadog_test_2)\
-, __datadog_test_1, __datadog_test_0, "world", ...__datadog_test_2));`)
+, __datadog_test_1, __datadog_test_0, "world", ...__datadog_test_2));`),
+          ['iast']
         )
       })
 
@@ -360,7 +385,8 @@ __datadog_test_0.apply(...__datadog_test_1), __datadog_test_0, ...__datadog_test
           builder.build(`let __datadog_test_0, __datadog_test_1, __datadog_test_2;
         return (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.concat, __datadog_test_2 = \
 [\n        ...b\n    ], _ddiast.concat(__datadog_test_1.call(__datadog_test_0, ...__datadog_test_2), \
-__datadog_test_1, __datadog_test_0, ...__datadog_test_2));`)
+__datadog_test_1, __datadog_test_0, ...__datadog_test_2));`),
+          ['iast']
         )
       })
 
@@ -372,7 +398,8 @@ __datadog_test_1, __datadog_test_0, ...__datadog_test_2));`)
           builder.build(`let __datadog_test_0, __datadog_test_1;
         return (__datadog_test_0 = "hello".concat, __datadog_test_1 = [\n...a\n], _ddiast.concat(\
 __datadog_test_0.call("hello", ...__datadog_test_1), __datadog_test_0, "hello"\
-, ...__datadog_test_1));`)
+, ...__datadog_test_1));`),
+          ['iast']
         )
       })
 
@@ -384,7 +411,8 @@ __datadog_test_0.call("hello", ...__datadog_test_1), __datadog_test_0, "hello"\
           builder.build(`let __datadog_test_0, __datadog_test_1, __datadog_test_2;
         return (__datadog_test_0 = "hello".concat, __datadog_test_1 = [\n...a\n], __datadog_test_2 = \
 [\n...(b ? [\nc\n] : [])\n], _ddiast.concat(__datadog_test_0.call("hello", ...__datadog_test_1, ...__datadog_test_2), \
-__datadog_test_0, "hello", ...__datadog_test_1, ...__datadog_test_2));`)
+__datadog_test_0, "hello", ...__datadog_test_1, ...__datadog_test_2));`),
+          ['iast']
         )
       })
     })
@@ -431,13 +459,14 @@ __datadog_test_0, "hello", ...__datadog_test_1, ...__datadog_test_2));`)
               js,
               builder.build(`let __datadog_test_0;
         return (__datadog_test_0 = 'a'.${method}, _ddiast.${method}(\
-__datadog_test_0.call('a'${argsWithComma}), __datadog_test_0, 'a'${argsWithComma}));`)
+__datadog_test_0.call('a'${argsWithComma}), __datadog_test_0, 'a'${argsWithComma}));`),
+              ['iast']
             )
           })
         } else {
           it(`does not modify "literal".${value}`, () => {
             const js = `'a'.${method}(${args});`
-            rewriteAndExpectNoTransformation(js)
+            rewriteAndExpectNoTransformation(js, ['iast'])
           })
         }
 
@@ -448,7 +477,8 @@ __datadog_test_0.call('a'${argsWithComma}), __datadog_test_0, 'a'${argsWithComma
             js,
             builder.build(`let __datadog_test_0, __datadog_test_1;
       return (__datadog_test_0 = a, __datadog_test_1 = __datadog_test_0.${method}, _ddiast.${method}(__datadog_test_1\
-.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`)
+.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`),
+            ['iast']
           )
         })
 
@@ -459,7 +489,8 @@ __datadog_test_0.call('a'${argsWithComma}), __datadog_test_0, 'a'${argsWithComma
             js,
             builder.build(`let __datadog_test_0, __datadog_test_1;
       (__datadog_test_0 = a(), __datadog_test_1 = __datadog_test_0.${method}, _ddiast.${method}(\
-__datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`)
+__datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`),
+            ['iast']
           )
         })
 
@@ -470,7 +501,8 @@ __datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __dat
             js,
             builder.build(`let __datadog_test_0, __datadog_test_1;
       (__datadog_test_0 = a.b, __datadog_test_1 = __datadog_test_0.${method}, _ddiast.${method}(\
-__datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`)
+__datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`),
+            ['iast']
           )
         })
 
@@ -482,13 +514,14 @@ __datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __dat
               js,
               builder.build(`let __datadog_test_0, __datadog_test_1;
         (__datadog_test_0 = a, __datadog_test_1 = String.prototype.${method}, _ddiast.${method}(\
-__datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`)
+__datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`),
+              ['iast']
             )
           })
         } else {
           it(`does not modify literal String.prototype.${value}.call`, () => {
             const js = `String.prototype.${method}.call("hello"${argsWithComma});`
-            rewriteAndExpectNoTransformation(js)
+            rewriteAndExpectNoTransformation(js, ['iast'])
           })
         }
 
@@ -499,7 +532,8 @@ __datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __dat
             js,
             builder.build(`let __datadog_test_0, __datadog_test_1;
     (__datadog_test_0 = a, __datadog_test_1 = String.prototype.${method}, _ddiast.${method}(\
-__datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`)
+__datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __datadog_test_0${argsWithComma}));`),
+            ['iast']
           )
         })
 
@@ -516,7 +550,8 @@ __datadog_test_1.call(__datadog_test_0${argsWithComma}), __datadog_test_1, __dat
             builder.build(`let __datadog_test_0, __datadog_test_1;
     (__datadog_test_0 = a, __datadog_test_1 = String.prototype.${method}, _ddiast.${method}(\
 __datadog_test_1.apply(__datadog_test_0, [${formatArgs(args)}]), __datadog_test_1, \
-__datadog_test_0${argsWithComma}));`)
+__datadog_test_0${argsWithComma}));`),
+            ['iast']
           )
         })
       })

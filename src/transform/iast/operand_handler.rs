@@ -6,7 +6,7 @@ use swc_common::{util::take::Take, Span};
 use swc_ecma_ast::ExprOrSpread;
 use swc_ecma_visit::swc_ecma_ast::{BinaryOp, Expr};
 
-use crate::visitor::ident_provider::{IdentKind, IdentProvider};
+use crate::visitor::iast::ident_provider::{IdentKind, IdentProvider};
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub enum IdentMode {

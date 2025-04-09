@@ -147,36 +147,45 @@ describe('getFilenameFromSourceMap', () => {
 })
 
 describe('getOriginalPathAndLineFromSourceMapFromSourceMap', () => {
-  const sourceMapsMap = new Map()
-  const setLRU = sinon.spy()
-  const getLRU = sinon.spy()
-  class LRU {
-    set (key, value) {
-      setLRU(key, value)
-      return sourceMapsMap.set(key, value)
-    }
+  let sourceMapsMap
+  let setLRU
+  let getLRU
+  let getOriginalPathAndLineFromSourceMap
 
-    get (key) {
-      getLRU(key)
-      return sourceMapsMap.get(key)
-    }
-  }
+  beforeEach(() => {
+    sourceMapsMap = new Map()
+    setLRU = sinon.spy()
+    getLRU = sinon.spy()
+    class LRU {
+      set (key, value) {
+        setLRU(key, value)
+        return sourceMapsMap.set(key, value)
+      }
 
-  const { getOriginalPathAndLineFromSourceMap } = proxyquire('../js/source-map', {
-    'lru-cache': LRU,
-    './node_source_map': nodeSourceMap,
-    fs: {
-      readFileSync: (filename) => {
-        switch (filename) {
-          case 'no-sourcemap':
-            return ''
-          case 'error':
-            throw new Error('errr')
-          default:
-            return readFileSync(filename)
-        }
+      get (key) {
+        getLRU(key)
+        return sourceMapsMap.get(key)
       }
     }
+
+    const sourceMap = proxyquire('../js/source-map', {
+      'lru-cache': LRU,
+      './node_source_map': nodeSourceMap,
+      fs: {
+        readFileSync: (filename) => {
+          switch (filename) {
+            case 'no-sourcemap':
+              return ''
+            case 'error':
+              throw new Error('errr')
+            default:
+              return readFileSync(filename)
+          }
+        }
+      }
+    })
+
+    getOriginalPathAndLineFromSourceMap = sourceMap.getOriginalPathAndLineFromSourceMap
   })
 
   const fileName = 'test-inline.js'
@@ -184,11 +193,6 @@ describe('getOriginalPathAndLineFromSourceMapFromSourceMap', () => {
     path: path.join(sourceMapResourcesPath, fileName),
     line: 5
   }
-
-  afterEach(() => {
-    sinon.reset()
-    sourceMapsMap.clear()
-  })
 
   it('should add SourceMap to cache', () => {
     const pathAndLine = getOriginalPathAndLineFromSourceMap(originalPathAndLine.path, originalPathAndLine.line, 12)

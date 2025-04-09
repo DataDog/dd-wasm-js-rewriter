@@ -5,9 +5,11 @@
 'use strict'
 const { getPrepareStackTrace, kSymbolPrepareStackTrace } = require('./js/stack-trace/')
 const { cacheRewrittenSourceMap, getOriginalPathAndLineFromSourceMap } = require('./js/source-map')
+const getNameAndVersion = require('./js/module-details')
+const yaml = require('js-yaml')
 
 class DummyRewriter {
-  rewrite (code, file) {
+  rewrite (code, file, passes, moduleName, moduleVersion) {
     return {
       content: code
     }
@@ -28,10 +30,27 @@ class NonCacheRewriter {
     } else {
       this.nativeRewriter = new DummyRewriter()
     }
+    if (config?.orchestrion) {
+      const { instrumentations } = yaml.load(config.orchestrion)
+      this.orchestrionModules = new Set(instrumentations.map((i) => i.module_name))
+    }
   }
 
-  rewrite (code, file) {
-    const response = this.nativeRewriter.rewrite(code, file)
+  rewrite (code, file, passes) {
+    let moduleName
+    let moduleVersion
+    if (passes.includes('orchestrion')) {
+      const details = getNameAndVersion(file)
+      moduleName = details.name
+      moduleVersion = details.version
+      if (!this.orchestrionModules.has(moduleName)) {
+        passes.splice(passes.indexOf('orchestrion'), 1)
+      }
+    }
+    if (passes.length === 0) {
+      return { content: code }
+    }
+    const response = this.nativeRewriter.rewrite(code, file, passes, moduleName, moduleVersion)
 
     // rewrite returns an empty content when for the 'notmodified' status
     if (response?.metrics?.status === 'notmodified') {
@@ -63,8 +82,8 @@ class NonCacheRewriter {
 }
 
 class CacheRewriter extends NonCacheRewriter {
-  rewrite (code, file) {
-    const response = super.rewrite(code, file)
+  rewrite (code, file, passes) {
+    const response = super.rewrite(code, file, passes)
 
     try {
       const { metrics, content } = response
