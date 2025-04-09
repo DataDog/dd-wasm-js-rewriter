@@ -14,6 +14,7 @@ const Module = require('module')
 
 const ORCHESTRION_CONFIG = `
 version: 1
+dc_module: dc-polyfill
 instrumentations:
   - module_name: undici
     version_range: ">=0.0.1"
@@ -33,6 +34,8 @@ describe('orchestrion', () => {
   let rewriter
 
   beforeEach(function () {
+    this.timeout(10000)
+
     sinon.restore()
     // Set up logger
     logger = {
@@ -42,7 +45,7 @@ describe('orchestrion', () => {
 
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orchestrion-test-'))
     execSync('npm init -y', { cwd: tempDir })
-    execSync('npm install undici --save', { cwd: tempDir })
+    execSync('npm install undici@5 dc-polyfill --save', { cwd: tempDir })
     undiciDir = path.join(tempDir, 'node_modules', 'undici')
 
     // Initialize rewriter with orchestrion config
@@ -62,7 +65,9 @@ describe('orchestrion', () => {
   })
 
   it('should rewrite undici index.js file', async function () {
-    const indexPath = path.join(undiciDir, 'index.js')
+    // TODO the replaceAll shouldn't be necessary, but right now Orchestrion
+    // only supports forward slashes
+    const indexPath = path.join(undiciDir, 'index.js').replaceAll('\\', '/')
     const code = fs.readFileSync(indexPath, 'utf8')
     const result = rewriter.rewrite(code, indexPath, ['orchestrion'])
 
@@ -70,6 +75,7 @@ describe('orchestrion', () => {
     expect(result).to.have.property('content')
     expect(result.content).to.be.a('string')
     expect(result.content.length).to.be.greaterThan(0)
+    expect(result.content.indexOf('orchestrion')).to.be.greaterThan(0)
 
     // Run the modified code and check that it's instrumented
     const mod = new Module(indexPath, module.parent)
@@ -77,7 +83,7 @@ describe('orchestrion', () => {
     mod.filename = indexPath
     mod._compile(result.content, indexPath)
 
-    const dc = require('diagnostics_channel')
+    const dc = mod.require('dc-polyfill')
     const tc = dc.tracingChannel('orchestrion:undici:fetch_expr')
     let eventMessage
     tc.subscribe({
