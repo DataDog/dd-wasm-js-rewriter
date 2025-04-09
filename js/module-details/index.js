@@ -1,6 +1,7 @@
 const fs = require('fs')
 const getDetails = require('module-details-from-path')
 const url = require('url')
+const path = require('path')
 
 function getVersion (baseDir) {
   if (baseDir instanceof URL || baseDir.startsWith('file://')) {
@@ -13,8 +14,10 @@ function getVersion (baseDir) {
   }
 }
 
+const getFilename = path.sep === '/' ? (f) => f : (f) => f.replaceAll('/', path.sep)
+
 module.exports = function getNameAndVersion (filename) {
-  const details = getDetails(filename)
+  const details = getDetails(getFilename(filename))
   if (details) {
     return { name: details.name, version: getVersion(details.basedir) }
   }
