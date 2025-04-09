@@ -366,14 +366,13 @@ fn generate_output<R: Read>(
             transform_status: Some(transform_status),
             literals_result,
         }),
-        Status::Cancelled => Err(Error::msg(format!(
+        Status::Cancelled | Status::Restart => Err(Error::msg(format!(
             "Cancelling {} file rewrite. Reason: {}",
             file,
             transform_status
                 .msg
                 .unwrap_or_else(|| "unknown".to_string())
         ))),
-        Status::Restart => panic!("this cannot happen"),
     }
 }
 
