@@ -2,13 +2,33 @@ const { getSourcePathAndLineFromSourceMaps } = require('../source-map')
 
 const kSymbolPrepareStackTrace = Symbol('_ddiastPrepareStackTrace')
 
+const evalRegex = /.*\(((?:.:[/\\]?)?[/\\].*):(\d*):(\d*)\)/g
+
 class WrappedCallSite {
   constructor (callSite) {
+    if (callSite.isEval()) {
+      evalRegex.lastIndex = 0
+      const evalOrigin = callSite.getEvalOrigin()
+      const evalData = evalRegex.exec(evalOrigin)
+
+      if (evalData) {
+        const { path, line, column } = getSourcePathAndLineFromSourceMaps(
+          evalData[1],
+          evalData[2],
+          evalData[3]
+        )
+
+        this.evalOrigin = evalOrigin.replace(`${evalData[1]}:${evalData[2]}:${evalData[3]}`,
+          `${path}:${line}:${column}`)
+      }
+    }
+
     const { path, line, column } = getSourcePathAndLineFromSourceMaps(
       callSite.getFileName(),
       callSite.getLineNumber(),
       callSite.getColumnNumber()
     )
+
     this.source = path
     this.lineNumber = line
     this.columnNumber = column
@@ -52,7 +72,7 @@ class WrappedCallSite {
   }
 
   getEvalOrigin () {
-    return this.callSite.getEvalOrigin()
+    return this.evalOrigin || this.callSite.getEvalOrigin()
   }
 
   isToplevel () {
@@ -72,7 +92,17 @@ class WrappedCallSite {
   }
 
   toString () {
-    return this.callSite.toString()
+    let callSiteString = this.callSite.toString()
+
+    if (this.isEval()) {
+      callSiteString = callSiteString.replace(this.callSite.getEvalOrigin(), this.getEvalOrigin())
+    }
+
+    const newFileLineChar = `${this.source}:${this.lineNumber}:${this.columnNumber})`
+    const originalFileLineChar =
+      `${this.callSite.getFileName()}:${this.callSite.getLineNumber()}:${this.callSite.getColumnNumber()})`
+
+    return callSiteString.toString()?.replace(originalFileLineChar, newFileLineChar)
   }
 
   toLocaleString () {
