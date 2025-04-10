@@ -95,7 +95,7 @@ class WrappedCallSite {
     let callSiteString = this.callSite.toString()
 
     if (this.isEval()) {
-      callSiteString = callSiteString.replace(this.callSite.getEvalOrigin(), this.evalOrigin)
+      callSiteString = callSiteString.replace(this.callSite.getEvalOrigin(), this.getEvalOrigin())
     }
 
     const newFileLineChar = `${this.source}:${this.lineNumber}:${this.columnNumber})`
