@@ -2,7 +2,7 @@ const { getSourcePathAndLineFromSourceMaps } = require('../source-map')
 
 const kSymbolPrepareStackTrace = Symbol('_ddiastPrepareStackTrace')
 
-const evalRegex = /.*\(((?:.:[/\\])?[/\\].*):(\d*):(\d*)\)/g
+const evalRegex = /.*\(((?:.:[/\\]?)?[/\\].*):(\d*):(\d*)\)/g
 
 class WrappedCallSite {
   constructor (callSite) {
