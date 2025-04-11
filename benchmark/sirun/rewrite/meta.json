@@ -1,0 +1,9 @@
+{
+  "name": "rewrite",
+  "cachegrind": false,
+  "instructions": true,
+  "iterations": 15,
+  "setup": "bash -c \"nohup node server.js >/dev/null 2>&1 &\"",
+  "run": "node client.js",
+  "timeout": 4
+}
