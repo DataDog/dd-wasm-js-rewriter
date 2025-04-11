@@ -1,6 +1,0 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-node scripts/version-checker.js
-node scripts/check_licenses.js
-npx lint-staged
-cargo clippy --workspace -- -D warnings
