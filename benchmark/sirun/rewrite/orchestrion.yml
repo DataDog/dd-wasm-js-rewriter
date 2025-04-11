@@ -1,0 +1,12 @@
+version: 1
+dc_module: dc-polyfill
+instrumentations:
+  - module_name: "test"
+    version_range: ">=0.1.0"
+    file_path: file.js
+    function_query:
+      name: methodToBeRewritten
+      type: method
+      kind: async
+    operator: tracePromise
+    channel_name: "methodToBeRewritten_invoke"
