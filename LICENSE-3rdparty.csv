@@ -35,7 +35,6 @@ dev,eslint-plugin-node,MIT,Copyright (c) 2015 Toru Nagashima
 dev,eslint-plugin-promise,ISC,Copyright (c) 2020
 dev,eslint-plugin-standard,MIT,Copyright (c) 2015 Jamund Ferguson
 dev,eslint,MIT,Copyright JS Foundation and other contributors
-dev,husky,MIT,Copyright (c) 2021 typicode
 dev,lint-staged,MIT,Copyright (c) 2016 Andrey Okonetchnikov
 dev,mocha,MIT,Copyright (c) 2011-2021 OpenJS Foundation and contributors
 dev,mocha-it-each,MIT,Copyright (c) 2013 Mikejsdev

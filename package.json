@@ -9,7 +9,10 @@
     "type": "git",
     "url": "git+https://github.com/DataDog/dd-wasm-js-rewriter.git"
   },
-  "keywords": ["datadog", "rewriter"],
+  "keywords": [
+    "datadog",
+    "rewriter"
+  ],
   "author": "Datadog Inc. <info@datadoghq.com>",
   "license": "Apache-2.0",
   "bugs": {
@@ -38,7 +41,6 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-standard": "^5.0.0",
-    "husky": "^7.0.0",
     "lint-staged": "^12.3.7",
     "mocha": "^9.1.1",
     "mocha-it-each": "^1.0.2",
@@ -69,15 +71,25 @@
     "test:junit": "mocha --file 'test/setup.js' --reporter mocha-junit-reporter --reporter-options mochaFile=./build/junit.xml test/**/*.spec.js",
     "test:integration": "mocha --file 'integration-test/setup.js' integration-test/**/*.spec.js",
     "test:integration:ci": "mocha --file 'integration-test/setup.js' --reporter mocha-junit-reporter --reporter-options mochaFile=./build/junit-integration.xml integration-test/**/*.spec.js",
-    "prepare": "husky install",
     "clippy": "cargo clippy --workspace -- -D warnings"
   },
   "lint-staged": {
-    "*.@(js|ts|tsx)": ["prettier --write", "eslint -c .eslintrc.json --fix"],
-    "*.@(yml|yaml)": ["prettier --parser yaml --write"],
-    "*.md": ["prettier --parser markdown --write"],
-    "*.json": ["prettier --parser json --write"],
-    "*.rs": ["rustfmt --config imports_granularity=Crate"]
+    "*.@(js|ts|tsx)": [
+      "prettier --write",
+      "eslint -c .eslintrc.json --fix"
+    ],
+    "*.@(yml|yaml)": [
+      "prettier --parser yaml --write"
+    ],
+    "*.md": [
+      "prettier --parser markdown --write"
+    ],
+    "*.json": [
+      "prettier --parser json --write"
+    ],
+    "*.rs": [
+      "rustfmt --config imports_granularity=Crate"
+    ]
   },
   "prettier": {
     "printWidth": 120,
