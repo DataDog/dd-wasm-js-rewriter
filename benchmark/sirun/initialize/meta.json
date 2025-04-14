@@ -2,7 +2,7 @@
   "name": "initialize",
   "cachegrind": false,
   "instructions": true,
-  "iterations": 15,
+  "iterations": 100,
   "run": "node ./init.js",
   "timeout": 4
 }

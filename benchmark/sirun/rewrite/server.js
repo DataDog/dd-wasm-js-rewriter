@@ -10,7 +10,7 @@ const csiMethods = [
   { src: 'concat' },
   { src: 'join' },
   { src: 'parse' },
-  { src: 'plusOperator', operator: true },
+  { src: 'plusOperator', operator: true }
 ]
 const filename = path.join(__dirname, 'node_modules', 'test', 'file.js')
 const contentToRewrite = fs.readFileSync(filename, 'utf8').toString()
@@ -32,4 +32,3 @@ const server = require('http').createServer((req, res) => {
 })
 
 server.listen(port, () => {})
-

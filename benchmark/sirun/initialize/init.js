@@ -1,21 +1,21 @@
 const { Rewriter } = require('../../../main')
 const csiMethods = [
-{ src: 'concat' },
-{ src: 'join' },
-{ src: 'parse' },
-{ src: 'plusOperator', operator: true },
-{ src: 'random' },
-{ src: 'replace' },
-{ src: 'slice' },
-{ src: 'substr' },
-{ src: 'substring' },
-{ src: 'toLowerCase', dst: 'stringCase' },
-{ src: 'toUpperCase', dst: 'stringCase' },
-{ src: 'tplOperator', operator: true },
-{ src: 'trim' },
-{ src: 'trimEnd' },
-{ src: 'trimStart', dst: 'trim' },
-{ src: 'eval', allowedWithoutCallee: true }
+  { src: 'concat' },
+  { src: 'join' },
+  { src: 'parse' },
+  { src: 'plusOperator', operator: true },
+  { src: 'random' },
+  { src: 'replace' },
+  { src: 'slice' },
+  { src: 'substr' },
+  { src: 'substring' },
+  { src: 'toLowerCase', dst: 'stringCase' },
+  { src: 'toUpperCase', dst: 'stringCase' },
+  { src: 'tplOperator', operator: true },
+  { src: 'trim' },
+  { src: 'trimEnd' },
+  { src: 'trimStart', dst: 'trim' },
+  { src: 'eval', allowedWithoutCallee: true }
 ]
 
 const orchestrion = `version: 1
@@ -71,8 +71,8 @@ instrumentations:
     operator: traceSync
     channel_name: "Embeddings_constructor"`
 
-new Rewriter({ 
-    csiMethods,
-    orchestrion
+// eslint-disable-next-line no-new
+new Rewriter({
+  csiMethods,
+  orchestrion
 })
-
