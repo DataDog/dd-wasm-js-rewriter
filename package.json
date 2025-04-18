@@ -20,7 +20,6 @@
     "url": "https://github.com/DataDog/dd-wasm-js-rewriter/issues"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
     "lru-cache": "^7.14.0",
     "module-details-from-path": "^1.0.3",
     "node-gyp-build": "^4.5.0"
@@ -42,6 +41,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-standard": "^5.0.0",
+    "js-yaml": "^4.1.0",
     "lint-staged": "^12.3.7",
     "mocha": "^9.1.1",
     "mocha-it-each": "^1.0.2",

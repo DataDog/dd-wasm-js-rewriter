@@ -4,6 +4,7 @@ mod tests {
         rewriter::Config, telemetry::TelemetryVerbosity, tests::CsiMethods, util::DefaultFileReader,
     };
     use speculoos::{assert_that, string::StrAssertions};
+    use orchestrion_js::{Instrumentor, OrchestrionConfig};
 
     const ORCHESTRION_CONFIG: &str = "
 version: 1
@@ -179,7 +180,7 @@ module.exports.EventSource = EventSource;
             file_iast_prefix_code: Vec::new(),
             strict: false,
             instrumentor: if orchestrion {
-                Some(ORCHESTRION_CONFIG.parse().unwrap())
+                Some(Instrumentor::new(serde_yaml::from_str::<OrchestrionConfig>(ORCHESTRION_CONFIG).unwrap()))
             } else {
                 None
             },

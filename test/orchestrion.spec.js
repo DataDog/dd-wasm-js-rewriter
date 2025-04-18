@@ -11,6 +11,7 @@ const path = require('path')
 const os = require('os')
 const { execSync } = require('child_process')
 const Module = require('module')
+const yaml = require('js-yaml')
 
 const ORCHESTRION_CONFIG = `
 version: 1
@@ -51,7 +52,7 @@ describe('orchestrion', () => {
     // Initialize rewriter with orchestrion config
     rewriter = new Rewriter({
       localVarPrefix: 'test',
-      orchestrion: ORCHESTRION_CONFIG,
+      orchestrion: yaml.load(ORCHESTRION_CONFIG),
       logLevel: 'DEBUG',
       telemetryVerbosity: 'DEBUG',
       literals: true, // TODO this breaks when enabled

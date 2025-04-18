@@ -22,13 +22,14 @@ serde-wasm-bindgen = "0.4"
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.63"
 log = {version = "0.4", features = ["std"] }
-orchestrion-js = { git = "https://github.com/Datadog/orchestrion-js", branch = "bengl/swc-21" }
+orchestrion-js = { git = "https://github.com/Datadog/orchestrion-js", branch = "bengl/no-yaml" }
 regex = "1.11.1"
 
 [dev-dependencies]
 tempfile = "3.3.0"
 speculoos = "0.11.0"
 ctor = "0.1.23"
+serde_yaml = "0.9.34"
 
 [profile.release]
 lto = true

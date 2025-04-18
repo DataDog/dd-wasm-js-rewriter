@@ -23,6 +23,7 @@ use std::{
     path::{Path, PathBuf},
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsError, JsValue};
+use orchestrion_js::{Instrumentor, OrchestrionConfig};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -43,7 +44,7 @@ pub struct RewriterConfig {
     pub telemetry_verbosity: Option<String>,
     pub literals: Option<bool>,
     pub strict: Option<bool>,
-    pub orchestrion: Option<String>,
+    pub orchestrion: Option<OrchestrionConfig>,
 }
 
 #[derive(Serialize)]
@@ -113,10 +114,9 @@ impl RewriterConfig {
             literals: self.literals.unwrap_or(true),
             file_iast_prefix_code,
             strict: self.strict.unwrap_or(false),
-            instrumentor: {
-                let orchestrion = self.orchestrion.clone();
-                orchestrion.map(|config_str| config_str.parse().unwrap())
-            },
+            instrumentor: self.orchestrion.clone().map(|config| {
+                Instrumentor::new(config)
+            }),
         }
     }
 }
