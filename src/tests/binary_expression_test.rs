@@ -189,7 +189,7 @@ mod tests {
         let rewritten = rewrite_js(original_code, js_file).map_err(|e| e.to_string());
         assert!(&rewritten.is_err());
         assert_that!(&rewritten.err()).contains(
-            "Cancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
+            "\nCancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
         );
         Ok(())
     }
@@ -203,7 +203,7 @@ mod tests {
         let rewritten = rewrite_js(original_code, js_file).map_err(|e| e.to_string());
         assert!(&rewritten.is_err());
         assert_that!(&rewritten.err()).contains(
-            "Cancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
+            "\nCancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
         );
         Ok(())
     }
@@ -215,7 +215,7 @@ mod tests {
         let rewritten = rewrite_js(original_code, js_file).map_err(|e| e.to_string());
         assert!(&rewritten.is_err());
         assert_that!(&rewritten.err()).contains(
-            "Cancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
+            "\nCancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
         );
         Ok(())
     }
@@ -229,7 +229,7 @@ mod tests {
 
         assert!(&rewritten.is_err());
         assert_that!(&rewritten.err()).contains(
-            "Cancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
+            "\nCancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
         );
         Ok(())
     }

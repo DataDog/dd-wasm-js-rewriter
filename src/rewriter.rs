@@ -12,7 +12,7 @@ use crate::{
         taint_block_transform_visitor::TaintBlockTransformVisitor,
     },
 };
-use anyhow::{Error, Result};
+use anyhow::{anyhow, Error, Result};
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use log::debug;
 use orchestrion_js::Instrumentor;
@@ -197,6 +197,8 @@ pub fn rewrite_js<R: Read>(
             &mut passes,
             meta,
         )
+    }).map_err(|err| {
+        anyhow!(err)
     })
 }
 
@@ -563,5 +565,7 @@ pub fn debug_js(code: String) -> Result<RewrittenOutput> {
             transform_status: None,
             literals_result: None,
         })
+    }).map_err(|err| {
+        anyhow!(err)
     });
 }

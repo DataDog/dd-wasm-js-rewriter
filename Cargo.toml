@@ -7,11 +7,11 @@ version = "4.0.1"
 crate-type = ["cdylib"]
 
 [dependencies]
-swc = "16.1.0"
-swc_common = "8.0.0"
-swc_ecma_ast = "8.0.0"
+swc = "21.0.0"
+swc_common = "8.1.0"
+swc_ecma_ast = "8.1.2"
 swc_ecma_visit = "8.0.0"
-swc_ecma_parser = "10.0.0"
+swc_ecma_parser = "11.1.2"
 anyhow = "1.0.81"
 fastrand = { version = "2.1.0", features = ["js"] }
 instant = "0.1"
@@ -22,7 +22,7 @@ serde-wasm-bindgen = "0.4"
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.63"
 log = {version = "0.4", features = ["std"] }
-orchestrion-js = { git = "https://github.com/Datadog/orchestrion-js", branch = "main" }
+orchestrion-js = { git = "https://github.com/Datadog/orchestrion-js", branch = "bengl/swc-21" }
 regex = "1.11.1"
 
 [dev-dependencies]
