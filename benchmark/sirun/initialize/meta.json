@@ -3,6 +3,10 @@
   "cachegrind": false,
   "instructions": true,
   "iterations": 100,
-  "run": "node ./init.js",
-  "timeout": 4
+  "timeout": 4,
+  "variants": {
+    "main": {
+      "run": "node ./init.js"
+    }
+  }
 }
