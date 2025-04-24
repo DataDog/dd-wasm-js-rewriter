@@ -28,7 +28,7 @@ export CPU_AFFINITY="${CPU_START_ID:-$TOTAL_CPU_CORES}" # Benchmarking Platform 
 
 nvm install $MAJOR_VERSION # provided by each benchmark stage
 export VERSION=`nvm current`
-# export ENABLE_AFFINITY=true
+export ENABLE_AFFINITY=true
 
 echo "using Node.js ${VERSION}"
 CPU_AFFINITY="${CPU_START_ID:-$TOTAL_CPU_CORES}" # reset for each node.js version
