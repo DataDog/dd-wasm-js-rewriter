@@ -66,8 +66,6 @@ for D in "${DIRS[@]}"; do
       echo "running $((BENCH_INDEX+1)) out of ${BENCH_COUNT}, ${D}/${V} in background, pinned to core ${CPU_AFFINITY}..."
 
       export SIRUN_VARIANT=$V
-      echo "SIRUN_VARIANT: ${SIRUN_VARIANT}"
-      echo "pwd: $(pwd)"
       (time node ../run-one-variant.js >> ../results.ndjson && echo "${D}/${V} finished.") &
       ((CPU_AFFINITY=CPU_AFFINITY+1))
     fi

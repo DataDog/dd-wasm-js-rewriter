@@ -1,0 +1,6 @@
+# Add a new stage called “benchmarks”
+stages:
+  - benchmarks
+
+  # … and include a file that specifies benchmarks CI jobs
+include: ".gitlab/benchmarks.yml"
