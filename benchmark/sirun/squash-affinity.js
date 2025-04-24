@@ -7,7 +7,6 @@ const path = require('path')
 
 const metaJson = require(path.join(process.cwd(), 'meta.json'))
 if (process.env.ENABLE_AFFINITY) {
-  console.error('process.env.ENABLE_AFFINITY', process.env.ENABLE_AFFINITY)
   squashAffinity(metaJson)
 
   if (metaJson.variants) {

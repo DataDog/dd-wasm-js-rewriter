@@ -8,14 +8,12 @@ function exec (...args) {
     const proc = childProcess.spawn(...args)
     streamAddVersion(proc.stdout)
     proc.on('error', (e) => {
-      console.error(e)
       reject(e)
     })
     proc.on('exit', (code) => {
       if (code === 0) {
         resolve()
       } else {
-        console.error(args)
         reject(new Error('Process exited with non-zero code. - ' + code))
       }
     })
