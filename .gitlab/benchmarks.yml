@@ -28,4 +28,5 @@ benchmarks:
     FF_USE_LEGACY_KUBERNETES_EXECUTION_STRATEGY: "true"
     UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME # The branch or tag name for which project is built.
     UPSTREAM_COMMIT_SHA: $CI_COMMIT_SHA # The commit revision the project is built for.
+    MAJOR_VERSION: 22
 
