@@ -6,11 +6,14 @@ use crate::{
     telemetry::TelemetryVerbosity,
     transform::transform_status::{Status, TransformStatus},
     util::{file_name, parse_source_map, FileReader},
-    visitor::{errortracking::errortracking_block_transform_visitor::ErrorTrackingBlockTransformVisitor, iast::{
-        csi_methods::CsiMethods,
-        literal_visitor::{get_literals, LiteralsResult},
-        taint_block_transform_visitor::TaintBlockTransformVisitor,
-    }}
+    visitor::{
+        errortracking::errortracking_block_transform_visitor::ErrorTrackingBlockTransformVisitor,
+        iast::{
+            csi_methods::CsiMethods,
+            literal_visitor::{get_literals, LiteralsResult},
+            taint_block_transform_visitor::TaintBlockTransformVisitor,
+        },
+    },
 };
 use anyhow::{Error, Result};
 use base64::{engine::general_purpose::STANDARD, Engine as _};
@@ -54,7 +57,7 @@ struct FileMeta<'a> {
 pub enum TransformPass {
     Iast,
     Orchestrion,
-    ErrorTracking
+    ErrorTracking,
 }
 
 impl TransformPass {
@@ -308,7 +311,7 @@ fn transform_iast(
 fn transfrom_errortracking(
     program: &mut Program,
     transform_status: &mut TransformStatus,
-    config: &mut Config
+    config: &mut Config,
 ) {
     let mut block_transform_visitor =
         ErrorTrackingBlockTransformVisitor::default(transform_status, config);

@@ -16,14 +16,14 @@ use std::path::PathBuf;
 mod arrow_func_tests;
 mod binary_assignation_test;
 mod binary_expression_test;
+mod error_tracking_tests;
 mod literal_test;
 mod orchestrion_test;
+mod pass_interactions_tests;
 mod source_map_test;
 mod string_method_test;
 mod telemetry_test;
 mod template_literal_test;
-mod error_tracking_tests;
-mod pass_interactions_tests;
 
 fn get_test_resources_folder() -> Result<PathBuf, String> {
     std::env::current_dir()
@@ -88,7 +88,6 @@ fn rewrite_js_with_csi_methods(
         None,
     )
 }
-
 
 fn rewrite_js_with_error_tracking(
     code: String,
