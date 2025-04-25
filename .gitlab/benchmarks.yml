@@ -39,7 +39,7 @@ benchmark:
       - MAJOR_VERSION: 22
 
 benchmarks-pr-comment:
-  stage: benchmarks-pr-comment
+  stage: benchmarks
   needs: [ benchmark ]
   when: on_success
   tags: ["arch:amd64"]
