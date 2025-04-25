@@ -23,6 +23,32 @@ if (typeof _ddiast === 'undefined') (function(globals) {
     };
 }((1, eval)('this')));`
 
+const EXPECTED_PREFIX_ET = `;
+if (typeof _dderrortracking === 'undefined') (function(globals) {
+    const noop = (res)=>res;
+    globals._dderrortracking = globals._dderrortracking || {
+        record_exception: noop,
+        record_exception_callback: noop
+    };
+}((1, eval)('this')));`
+
+const EXPECTED_PREFIX_IAST_ET = `;
+if (typeof _dderrortracking === 'undefined') (function(globals) {
+    const noop = (res)=>res;
+    globals._dderrortracking = globals._dderrortracking || {
+        record_exception: noop,
+        record_exception_callback: noop
+    };
+}((1, eval)('this')));
+;
+if (typeof _ddiast === 'undefined') (function(globals) {
+    const noop = (res)=>res;
+    globals._ddiast = globals._ddiast || {
+        trim: noop
+    };
+}((1, eval)('this')));
+`
+
 describe('Initialization prefix', () => {
   describe('Rewrites', () => {
     it('should not add prefix when the file is not modified', () => {
@@ -36,6 +62,26 @@ describe('Initialization prefix', () => {
 
       const rewritten = rewriteAst(wrapBlock(js), ['iast'], testOptions)
 
+      expect(rewritten.startsWith(EXPECTED_PREFIX_IAST)).to.be.true
+    })
+
+    it('should add two prefixes in rewritten files', () => {
+      const js = 'a.trim(); try { doSomething() } catch(error) { doSomething() } '
+
+      const rewritten = rewriteAst(wrapBlock(js), ['iast', 'errortracking'], testOptions)
+      expect(rewritten.startsWith(EXPECTED_PREFIX_IAST_ET)).to.be.true
+    })
+
+    it('should add only errortracking prefix in rewritten files', () => {
+      const js = 'fetch(something).then(doSomething).catch(doSomething)'
+      const rewritten = rewriteAst(wrapBlock(js), ['errortracking', 'iast'], testOptions)
+      expect(rewritten.startsWith(EXPECTED_PREFIX_ET)).to.be.true
+    })
+
+    it('should add only iast prefix in rewritten files', () => {
+      const js = 'a.trim();'
+
+      const rewritten = rewriteAst(wrapBlock(js), ['iast', 'errortracking'], testOptions)
       expect(rewritten.startsWith(EXPECTED_PREFIX_IAST)).to.be.true
     })
 
