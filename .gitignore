@@ -127,3 +127,6 @@ build
 .vscode
 
 wasm
+
+# benchmark results
+results.ndjson
