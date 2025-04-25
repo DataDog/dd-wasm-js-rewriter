@@ -1,7 +1,7 @@
 variables:
   BASE_CI_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/benchmarking-platform:dd-wasm-js-rewriter
 
-.benchmarks:
+benchmarks:
   stage: benchmarks
   when: on_success
   tags: ["runner:apm-k8s-tweaked-metal"]
@@ -16,6 +16,7 @@ variables:
     - ./steps/run-benchmarks.sh
     - ./steps/analyze-results.sh
     - "./steps/upload-results-to-s3.sh || :"
+    - "./steps/post-pr-comment.sh || :"
   artifacts:
     name: "artifacts"
     when: always
@@ -29,28 +30,4 @@ variables:
     UPSTREAM_COMMIT_SHA: $CI_COMMIT_SHA # The commit revision the project is built for.
     UPSTREAM_PROJECT_ID: $CI_PROJECT_ID # The ID of the current project. This ID is unique across all projects on the GitLab instance.
     UPSTREAM_PROJECT_NAME: $CI_PROJECT_NAME # "dd-wasm-js-rewriter"
-
-benchmark:
-  extends: .benchmarks
-  parallel:
-    matrix:
-      - MAJOR_VERSION: 18
-      - MAJOR_VERSION: 20
-      - MAJOR_VERSION: 22
-
-benchmarks-pr-comment:
-  stage: benchmarks
-  needs: [ benchmark ]
-  when: on_success
-  tags: ["arch:amd64"]
-  image: $BASE_CI_IMAGE
-  script:
-    - export ARTIFACTS_DIR="$(pwd)/artifacts" && (mkdir "${ARTIFACTS_DIR}" || :)
-    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/DataDog/".insteadOf "https://github.com/DataDog/"
-    - git clone --branch dd-wasm-js-rewriter https://github.com/DataDog/benchmarking-platform platform && cd platform
-    - ./steps/download-results-from-s3.sh
-    - ./steps/post-pr-comment.sh
-  allow_failure: true
-  variables:
-    # Gitlab and BP specific env vars. Do not modify.
-    KUBERNETES_SERVICE_ACCOUNT_OVERWRITE: dd-wasm-js-rewriter
+    MAJOR_VERSION: 22
