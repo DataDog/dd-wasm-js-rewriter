@@ -1,6 +1,6 @@
 # dd-wasm-js-rewriter
 
-Nodejs native AST rewriter heavily based on [Speedy Web Compiler o SWC compiler](https://github.com/swc-project/swc) used to instrument Javascript source files.
+Node.js native AST rewriter heavily based on [Speedy Web Compiler o SWC compiler](https://github.com/swc-project/swc) used to instrument Javascript source files.
 
 ## Workflow
 
