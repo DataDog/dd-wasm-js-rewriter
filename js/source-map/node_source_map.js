@@ -1,6 +1,6 @@
 // This file is a modified version of:
 // https://github.com/nodejs/node/blob/5e57d24d325f0aea74394f78ebdc06857cca77b1/lib/internal/source_map/source_map.js
-// from the NodeJs codebase
+// from the Node.js codebase
 
 // This file is a modified version of:
 // https://cs.chromium.org/chromium/src/v8/tools/SourceMap.js?rcl=dd10454c1d
