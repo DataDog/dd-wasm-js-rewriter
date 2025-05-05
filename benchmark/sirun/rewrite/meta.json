@@ -2,8 +2,8 @@
   "name": "rewrite",
   "cachegrind": false,
   "instructions": true,
-  "iterations": 300,
-  "timeout": 30,
+  "iterations": 100,
+  "timeout": 60,
   "variants": {
     "iast+orchestrion": {
       "setup": "bash -c \"nohup node server.js > /dev/null 2>&1 &\"",

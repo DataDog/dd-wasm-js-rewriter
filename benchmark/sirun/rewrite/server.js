@@ -22,9 +22,13 @@ let connectionsMade = 0
 
 const server = require('http').createServer((req, res) => {
   const code = contentToRewrite
-  rewriter.rewrite(code, filename, ['iast', 'orchestrion'])
+  let count = 0
+  for (let i = 0; i < 500; i++) {
+    const rewritten = rewriter.rewrite(code, filename, ['iast', 'orchestrion'])
+    count += rewritten.content ? 1 : 0
+  }
 
-  res.end('OK')
+  res.end('OK - ' + count)
 
   if (++connectionsMade === reqs) {
     server.close()
