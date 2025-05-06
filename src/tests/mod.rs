@@ -111,7 +111,7 @@ fn rewrite_js_with_error_tracking(
             instrumentor: None,
         },
         &source_map_reader,
-        &[String::from("errortracking")],
+        &[String::from("error_tracking")],
         None,
         None,
     )
@@ -138,7 +138,7 @@ fn rewrite_js_with_error_tracking_and_iast(
             instrumentor: None,
         },
         &source_map_reader,
-        &[String::from("iast"), String::from("errortracking")],
+        &[String::from("iast"), String::from("error_tracking")],
         None,
         None,
     )

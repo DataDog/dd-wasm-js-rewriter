@@ -187,7 +187,7 @@ pub fn rewrite_js<R: Read>(
         if base_passes.contains(&String::from("orchestrion")) {
             passes.insert(TransformPass::Orchestrion);
         }
-        if base_passes.contains(&String::from("errortracking")) {
+        if base_passes.contains(&String::from("error_tracking")) {
             passes.insert(TransformPass::ErrorTracking);
         }
         let meta = FileMeta {
