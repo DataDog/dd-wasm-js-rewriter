@@ -18,7 +18,7 @@ describe('error tracking rewrite', () => {
           console.error(error);
         }
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -35,7 +35,7 @@ describe('error tracking rewrite', () => {
           console.error(foo);
         }
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -52,7 +52,7 @@ describe('error tracking rewrite', () => {
           console.error(foo);
         }
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -68,7 +68,7 @@ describe('error tracking rewrite', () => {
           console.error("catch block");
         }
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -86,7 +86,7 @@ describe('error tracking rewrite', () => {
         console.error(foo)
       }
     `
-    const rewritten = rewriteAst(js, ['errortracking'], { localVarPrefix: '' })
+    const rewritten = rewriteAst(js, ['error_tracking'], { localVarPrefix: '' })
     const re = /__datadog_errortracking_([a-zA-Z0-9]+)/g
     const hashes = new Set()
     let match
@@ -110,7 +110,7 @@ describe('error tracking rewrite', () => {
         }
       }
     `
-    const rewritten = rewriteAst(js, ['errortracking'], { localVarPrefix: '' })
+    const rewritten = rewriteAst(js, ['error_tracking'], { localVarPrefix: '' })
     const re = /__datadog_errortracking_([a-zA-Z0-9]+)/g
     const hashes = new Set()
     let match
@@ -130,7 +130,7 @@ describe('error tracking rewrite', () => {
           throw 'did not work';
         }).catch(_dderrortracking.record_exception_callback((error)=>console.error(error)));
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -143,7 +143,7 @@ describe('error tracking rewrite', () => {
           throw 'did not work';
         }).catch(_dderrortracking.record_exception_callback(onError));
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -156,7 +156,7 @@ describe('error tracking rewrite', () => {
           throw 'did not work';
         }).catch(_dderrortracking.record_exception_callback(this.onError));
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -169,7 +169,7 @@ describe('error tracking rewrite', () => {
           throw 'did not work';
         }).catch(_dderrortracking.record_exception_callback(onError(arg)));
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -183,7 +183,7 @@ describe('error tracking rewrite', () => {
           throw 'did not work';
         }).catch(_dderrortracking.record_exception_callback((error)=>console.error(error))).finally(console.log('foo'));
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 
@@ -196,7 +196,7 @@ describe('error tracking rewrite', () => {
           throw 'did not work';
         }).then(doSomething).catch(_dderrortracking.record_exception_callback(onError)).finally(doSomething);
       }`,
-      ['errortracking']
+      ['error_tracking']
     )
   })
 })
