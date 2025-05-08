@@ -6,8 +6,9 @@ const readline = require('readline')
 function exec (...args) {
   return new Promise((resolve, reject) => {
     const proc = childProcess.spawn(...args)
-    streamAddVersion(proc.stdout)
+    // streamAddVersion(proc.stdout)
     proc.on('error', (e) => {
+      console.log('error', e)
       reject(e)
     })
     proc.on('exit', (code) => {
@@ -37,6 +38,6 @@ function streamAddVersion (input) {
 
 module.exports = {
   exec,
-  stdio: ['inherit', 'pipe', 'inherit'],
+  stdio: [0, 1, 1], //['inherit', 'pipe', 'inherit'],
   streamAddVersion
 }

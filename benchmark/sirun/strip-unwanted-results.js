@@ -6,11 +6,13 @@ const path = require('path')
 const IGNORE_STATS = [
   'system.time'
 ]
-
-const lines = fs
+const fileContent = fs
   .readFileSync(path.join(__dirname, 'results.ndjson'))
   .toString()
   .trim()
+console.log('results.ndjson', fileContent)
+
+const lines = fileContent
   .split('\n')
 
 if (lines.length === 1 && lines[0] === '') {

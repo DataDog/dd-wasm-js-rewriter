@@ -4,4 +4,6 @@
 
 const { exec, stdio } = require('./run-util')
 
-exec('sirun', ['meta-temp.json'], { env: process.env, stdio })
+const env = Object.assign({}, process.env)
+
+exec('sirun', ['meta-temp.json'], { env, stdio })
