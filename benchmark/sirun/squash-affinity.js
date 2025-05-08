@@ -6,14 +6,14 @@ const fs = require('fs')
 const path = require('path')
 
 const metaJson = require(path.join(process.cwd(), 'meta.json'))
-if (process.env.ENABLE_AFFINITY) {
+
+if (process.env.ENABLE_AFFINITY === 'true') {
   squashAffinity(metaJson)
 
   if (metaJson.variants) {
     const variants = metaJson.variants
 
-    for (const variantName in variants) {
-      const variant = variants[variantName]
+    for (const variant of Object.values(variants)) {  
       squashAffinity(variant)
     }
   }

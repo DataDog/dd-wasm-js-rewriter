@@ -130,3 +130,4 @@ wasm
 
 # benchmark results
 results.ndjson
+*.lock_core

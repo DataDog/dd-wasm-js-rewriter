@@ -25,7 +25,7 @@ for (const line of lines) {
 
   for (const iteration of obj.iterations) {
     for (const stat of IGNORE_STATS) {
-      if (stat in iteration) {
+      if (Object.hasOwn(iteration, stat)) {
         delete iteration[stat]
       }
     }

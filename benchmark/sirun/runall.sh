@@ -19,64 +19,71 @@ else
   source /usr/local/nvm/nvm.sh
 fi
 
-# run each test in parallel for a given version of Node.js
-# once all of the tests have complete move on to the next version
 
-TOTAL_CPU_CORES=$(nproc 2>/dev/null || echo "24")
+TOTAL_CPU_CORES=$(( $(nproc 2>/dev/null || echo "48") / 2 ))
 
-export CPU_AFFINITY="${CPU_START_ID:-$TOTAL_CPU_CORES}" # Benchmarking Platform convention
+# Initialize all cores as available
+for ((i=0; i<TOTAL_CPU_CORES; i++)); do
+  echo "1" > "core_${i}.lock_core"
+done
 
-nvm install $MAJOR_VERSION # provided by each benchmark stage
+
+CPU_AFFINITY_BASE="${CPU_START_ID:-$TOTAL_CPU_CORES}" # Benchmarking Platform convention
+
+MAJOR_VERSION=${MAJOR_VERSION:-22}  # provided by each benchmark stage
+
+nvm install $MAJOR_VERSION
 export VERSION=`nvm current`
-export ENABLE_AFFINITY=true
+export ENABLE_AFFINITY=${ENABLE_AFFINITY:-true}
 
 echo "using Node.js ${VERSION}"
-CPU_AFFINITY="${CPU_START_ID:-$TOTAL_CPU_CORES}" # reset for each node.js version
-SPLITS=${SPLITS:-1}
-GROUP=${GROUP:-1}
 
-BENCH_COUNT=0
-for D in "${DIRS[@]}"; do
-  cd "${D}"
-  variants="$(node ../get-variants.js)"
-  for V in $variants; do BENCH_COUNT=$(($BENCH_COUNT+1)); done
-  cd ..
-done
-
-echo "BENCH_COUNT: ${BENCH_COUNT}"
-GROUP_SIZE=$(($(($BENCH_COUNT+$SPLITS-1))/$SPLITS)) # round up
-
-BENCH_INDEX=0
-BENCH_END=$(($GROUP_SIZE*$GROUP))
-BENCH_START=$(($BENCH_END-$GROUP_SIZE))
-
-if [[ ${GROUP_SIZE} -gt 24 ]]; then
-  echo "Group size ${GROUP_SIZE} is larger than available number of CPU cores on Benchmarking Platform machines (${TOTAL_CPU_CORES} cores)"
-  exit 1
-fi
-
-for D in "${DIRS[@]}"; do
-  cd "${D}"
-  variants="$(node ../get-variants.js)"
-
-  node ../squash-affinity.js
-
-  for V in $variants; do
-    if [[ ${BENCH_INDEX} -ge ${BENCH_START} && ${BENCH_INDEX} -lt ${BENCH_END} ]]; then
-      echo "running $((BENCH_INDEX+1)) out of ${BENCH_COUNT}, ${D}/${V} in background, pinned to core ${CPU_AFFINITY}..."
-
-      export SIRUN_VARIANT=$V
-      (time node ../run-one-variant.js >> ../results.ndjson && echo "${D}/${V} finished.") &
-      ((CPU_AFFINITY=CPU_AFFINITY+1))
-    fi
-
-    BENCH_INDEX=$(($BENCH_INDEX+1))
+get_next_available_core() {
+  while true; do
+    local cpu_id=0
+    for ((cpu_id=0; cpu_id<$TOTAL_CPU_CORES; cpu_id++)); do
+      if [ "$(cat core_${cpu_id}.lock_core)" -eq 1 ]; then
+        echo $cpu_id
+        return
+      fi
+    done
+    sleep 1
   done
+}
 
+run_benchmark() {
+  local dir=$1
+  local variant=$2
+  local cpu_id=$3
+
+  cd "${dir}"
+
+  export CPU_AFFINITY=$((CPU_AFFINITY_BASE + cpu_id))
+  echo "running ${dir}/${variant} in background, pinned to core ${CPU_AFFINITY}..."
+
+  export SIRUN_VARIANT=$variant
+  (time node ../run-one-variant.js >> ../results.ndjson && echo "${D}/${V} finished.")
   cd ..
+
+  echo "1" > "core_${cpu_id}.lock_core"
+
+  return
+}
+
+for dir in "${DIRS[@]}"; do
+  cd "${dir}"
+  variants="$(node ../get-variants.js)"
+  node ../squash-affinity.js
+  cd ..
+  for variant in $variants; do 
+    cpu_id=$(get_next_available_core)
+    echo "0" > "core_${cpu_id}.lock_core"
+
+    run_benchmark $dir $variant $cpu_id &
+  done
 done
 
-wait # waits until all tests are complete before continuing
+wait
 
 node ./strip-unwanted-results.js
 
