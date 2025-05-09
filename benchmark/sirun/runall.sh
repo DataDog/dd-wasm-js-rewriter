@@ -29,7 +29,6 @@ for ((i=0; i<AVAILABLE_CPU_CORES; i++)); do
 done
 
 
-echo "CPU_START_ID: ${CPU_START_ID}"
 CPU_AFFINITY_BASE="${CPU_START_ID:-$TOTAL_CPU_CORES}" # Benchmarking Platform convention
 
 MAJOR_VERSION=${MAJOR_VERSION:-22}  # provided by each benchmark stage
@@ -59,13 +58,11 @@ run_benchmark() {
   local cpu_id=$3
 
   cd "${dir}"
-  echo cd "${dir}"
 
   export CPU_AFFINITY=$((CPU_AFFINITY_BASE + cpu_id))
   echo "running ${dir}/${variant} in background, pinned to core ${CPU_AFFINITY}..."
 
   export SIRUN_VARIANT=$variant
-  sleep $((RANDOM % 10))
   (time node ../run-one-variant.js >> ../results.ndjson && echo "${D}/${V} finished.")
   
   cd ..

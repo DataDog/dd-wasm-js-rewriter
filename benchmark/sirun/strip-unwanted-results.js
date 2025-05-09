@@ -10,7 +10,6 @@ const fileContent = fs
   .readFileSync(path.join(__dirname, 'results.ndjson'))
   .toString()
   .trim()
-console.log('results.ndjson', fileContent)
 
 const lines = fileContent
   .split('\n')

@@ -2,7 +2,7 @@
   "name": "initialize",
   "cachegrind": false,
   "instructions": true,
-  "iterations": 5,
+  "iterations": 100,
   "timeout": 15,
   "variants": {
     "main": {
