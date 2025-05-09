@@ -78,11 +78,10 @@ done
 
 wait # waits until all tests are complete before continuing
 
+echo "Benchmark Results:"
+cat ./results.ndjson
+
 node ./strip-unwanted-results.js
 
-if [ "$DEBUG_RESULTS" == "true" ]; then
-  echo "Benchmark Results:"
-  cat ./results.ndjson
-fi
 
 echo "all tests for ${VERSION} have now completed."

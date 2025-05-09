@@ -2,11 +2,12 @@
   "name": "initialize",
   "cachegrind": false,
   "instructions": true,
-  "iterations": 100,
+  "iterations": 2,
   "timeout": 15,
   "variants": {
     "main": {
-      "run": "node ./init.js"
+      "run": "node ./init.js",
+      "run_with_affinity": "bash -c \"sleep 1 && echo taskset -c $CPU_AFFINITY node ./init.js\""
     }
   }
 }
