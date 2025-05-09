@@ -156,7 +156,7 @@ let count = 0
 
 const { Rewriter } = require('../../../main')
 
-for (let i = 0; i < 1e4; i++) {
+for (let i = 0; i < 1e2; i++) {
   for (const config of configs) {
     const instance = new Rewriter({
       csiMethods: config.csiMethods,

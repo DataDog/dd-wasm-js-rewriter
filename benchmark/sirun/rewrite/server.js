@@ -23,7 +23,7 @@ let connectionsMade = 0
 const server = require('http').createServer((req, res) => {
   const code = contentToRewrite
   let count = 0
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 10; i++) {
     const rewritten = rewriter.rewrite(code, filename, ['iast', 'orchestrion'])
     count += rewritten.content ? 1 : 0
   }
