@@ -20,10 +20,11 @@ else
 fi
 
 
-TOTAL_CPU_CORES=$(( $(nproc 2>/dev/null || echo "48") / 2 ))
+TOTAL_CPU_CORES=$(nproc 2>/dev/null || echo "24")
+AVAILABLE_CPU_CORES=$((TOTAL_CPU_CORES / 2))
 
 # Initialize all cores as available
-for ((i=0; i<TOTAL_CPU_CORES; i++)); do
+for ((i=0; i<AVAILABLE_CPU_CORES; i++)); do
   echo "1" > "core_${i}.lock_core"
 done
 
@@ -42,7 +43,7 @@ echo "using Node.js ${VERSION}"
 get_next_available_core() {
   while true; do
     local cpu_id=0
-    for ((cpu_id=0; cpu_id<$TOTAL_CPU_CORES; cpu_id++)); do
+    for ((cpu_id=0; cpu_id<$AVAILABLE_CPU_CORES; cpu_id++)); do
       if [ "$(cat core_${cpu_id}.lock_core)" -eq 1 ]; then
         echo $cpu_id
         return
