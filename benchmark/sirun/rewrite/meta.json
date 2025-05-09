@@ -1,0 +1,13 @@
+{
+  "name": "rewrite",
+  "cachegrind": false,
+  "instructions": true,
+  "iterations": 100,
+  "timeout": 15,
+  "variants": {
+    "iast+orchestrion": {
+      "run": "node rewrite.js",
+      "run_with_affinity": "bash -c \"taskset -c $CPU_AFFINITY node rewrite.js\""
+    }
+  }
+}
