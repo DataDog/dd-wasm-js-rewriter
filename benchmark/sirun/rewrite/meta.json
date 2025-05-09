@@ -8,8 +8,8 @@
     "iast+orchestrion": {
       "setup": "bash -c \"nohup node server.js > /dev/null 2>&1 &\"",
       "run": "node client.js",
-      "run_with_affinity2": "bash -c \"echo taskset -c $CPU_AFFINITY node client.js\"",
-      "run_with_affinity": "bash -c \"sleep 1 && echo iastorchestrion\""
+      "run_with_affinity": "bash -c \"echo taskset -c $CPU_AFFINITY node client.js && taskset -c $CPU_AFFINITY node client.js\"",
+      "run_with_affinity2": "bash -c \"sleep 1 && echo iastorchestrion\""
     }
   }
 }
