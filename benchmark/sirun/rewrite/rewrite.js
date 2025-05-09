@@ -19,7 +19,7 @@ const rewriter = new Rewriter({ csiMethods, orchestrion })
 
 let count = 0
 
-for (let i = 0; i < 1e2; i++) {
+for (let i = 0; i < 1e4; i++) {
   const rewritten = rewriter.rewrite(code, filename, ['iast', 'orchestrion'])
   count += rewritten.content ? 1 : 0
 }
