@@ -22,8 +22,31 @@ class DummyRewriter {
 
 let NativeRewriter
 
+function isPrime (num) {
+  for (let i = 2; i < num; i++) {
+    if (num % i === 0) {
+      return false
+    }
+  }
+
+  return true
+}
+
+const total = []
 class NonCacheRewriter {
   constructor (config) {
+    // force  a performance regression
+    for (let i = 1000; i < 1500; i++) {
+      if (isPrime(i)) {
+        total.push(i)
+      }
+    }
+
+    if (total.length < 0) {
+      // eslint-disable-next-line no-console
+      console.log('never executed', total.length)
+    }
+
     if (NativeRewriter) {
       this.nativeRewriter = new NativeRewriter(config)
       this.setLogger(config)
@@ -37,6 +60,16 @@ class NonCacheRewriter {
   }
 
   rewrite (code, file, passes) {
+    // force  a performance regression
+    for (let i = 100; i < 300; i++) {
+      if (isPrime(i)) {
+        total.push(i)
+      }
+    }
+    if (total.length < 0) {
+      // eslint-disable-next-line no-console
+      console.log('never executed', total.length)
+    }
     let moduleName
     let moduleVersion
     if (passes.includes('orchestrion')) {
