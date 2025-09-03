@@ -22,7 +22,7 @@ serde-wasm-bindgen = "0.4"
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.63"
 log = {version = "0.4", features = ["std"] }
-orchestrion-js = { git = "https://github.com/Datadog/orchestrion-js", rev = "d7d7a8bb84906d801201d32661eaa0dcdbc643a1" }
+orchestrion-js = { git = "https://github.com/apm-js-collab/orchestrion-js" }
 regex = "1.11.1"
 
 [dev-dependencies]
