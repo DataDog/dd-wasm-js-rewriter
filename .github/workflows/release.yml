@@ -68,8 +68,6 @@ jobs:
     environment: npm
     permissions:
       id-token: write
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       - uses: codex-team/action-nodejs-package-info@v1.1
