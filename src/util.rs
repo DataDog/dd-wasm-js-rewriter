@@ -40,7 +40,7 @@ pub trait FileReader<R: Read> {
     }
 }
 
-#[allow(dead_code)]
+#[cfg(test)]
 pub struct DefaultFileReader {}
 impl FileReader<File> for DefaultFileReader {
     fn read(&self, path: &Path) -> std::io::Result<File>
