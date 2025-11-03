@@ -151,13 +151,11 @@ impl FileReader<Cursor<Vec<u8>>> for WasmFileReader {
                     Cursor::new(arr.to_vec())
                 })
                 .map_err(|err| {
-                    std::io::Error::new(
-                        std::io::ErrorKind::Other,
-                        format!("Error reading source map from wasm {err:?}"),
+                    std::io::Error::other(
+                        format!("Error reading source map from wasm {err:?}")
                     )
                 }),
-            None => Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            None => Err(std::io::Error::other(
                 "Error reading source map. No path provided".to_string(),
             )),
         }
