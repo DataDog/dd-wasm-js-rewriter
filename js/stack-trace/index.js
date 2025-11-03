@@ -4,6 +4,12 @@ const kSymbolPrepareStackTrace = Symbol('_ddiastPrepareStackTrace')
 
 const evalRegex = /.*\(((?:.:[/\\]?)?[/\\].*):(\d*):(\d*)\)/g
 
+function isFlagPresent (flag) {
+  return process.env.NODE_OPTIONS?.includes(flag) ||
+    process.execArgv?.some(arg => arg.includes(flag))
+}
+
+const sourceMapsEnabled = isFlagPresent('--enable-source-maps')
 class WrappedCallSite {
   constructor (callSite) {
     if (callSite.isEval()) {
@@ -33,6 +39,18 @@ class WrappedCallSite {
     this.lineNumber = line
     this.columnNumber = column
     this.callSite = callSite
+
+    // Automatically support methods that are added in newer versions of Node.js
+    const callSiteProto = Object.getPrototypeOf(callSite)
+    const originalCallSiteMethdos = Object.getOwnPropertyNames(callSiteProto)
+
+    originalCallSiteMethdos.forEach(method => {
+      if (method === 'constructor') return
+      if (this[method]) return
+      if (typeof callSiteProto[method] !== 'function') return
+
+      this[method] = function (...args) { return this.callSite[method](...args) }
+    })
   }
 
   getThis () {
@@ -56,6 +74,10 @@ class WrappedCallSite {
   }
 
   getFileName () {
+    return sourceMapsEnabled ? this.callSite.getFileName() : this.source
+  }
+
+  getTranslatedFileName () {
     return this.source
   }
 
@@ -64,14 +86,26 @@ class WrappedCallSite {
   }
 
   getLineNumber () {
+    return sourceMapsEnabled ? this.callSite.getLineNumber() : this.lineNumber
+  }
+
+  getTranslatedLineNumber () {
     return this.lineNumber
   }
 
   getColumnNumber () {
+    return sourceMapsEnabled ? this.callSite.getColumnNumber() : this.columnNumber
+  }
+
+  getTranslatedColumnNumber () {
     return this.columnNumber
   }
 
   getEvalOrigin () {
+    return sourceMapsEnabled ? this.callSite.getEvalOrigin() : (this.evalOrigin || this.callSite.getEvalOrigin())
+  }
+
+  getTranslatedEvalOrigin () {
     return this.evalOrigin || this.callSite.getEvalOrigin()
   }
 
