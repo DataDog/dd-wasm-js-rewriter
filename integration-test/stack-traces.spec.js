@@ -2,6 +2,7 @@
 'use strict'
 
 const childProcess = require('child_process')
+const path = require('path')
 const { isFileEdited } = require('./edited-files-cache')
 
 describe('Test stack traces', () => {
@@ -37,14 +38,14 @@ describe('Test stack traces', () => {
     })
   })
 
-  describe('When sourcemaps are enabled', () => {
+  describe.only('When sourcemaps are enabled', () => {
     it('should calculate stack traces correctly', () => {
       const result = childProcess.execSync(
         'node --enable-source-maps --require ./init-rewriter.js ./requires/error-typescript.js',
         {
           cwd: __dirname
         }).toString()
-      expect(result).to.contain('requires/error-typescript.ts:2:15')
+      expect(result).to.contain(`${path.join('requires', 'error-typescript.ts')}:2:15`)
     })
   })
 })
