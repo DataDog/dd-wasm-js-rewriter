@@ -68,8 +68,6 @@ jobs:
     environment: npm
     permissions:
       id-token: write
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v3
       - uses: codex-team/action-nodejs-package-info@v1.1
@@ -79,5 +77,6 @@ jobs:
           name: ${{ env.ARTIFACT_NAME }}-${{ steps.package.outputs.version }}
       - uses: actions/setup-node@v3
         with:
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm publish --access=public ./${{ env.ARTIFACT_NAME }}-${{ steps.package.outputs.version }}.tgz --provenance
+      - run: npm publish --access=public ./${{ env.ARTIFACT_NAME }}-${{ steps.package.outputs.version }}.tgz
