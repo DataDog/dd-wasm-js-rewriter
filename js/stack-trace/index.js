@@ -42,9 +42,9 @@ class WrappedCallSite {
 
     // Automatically support methods that are added in newer versions of Node.js
     const callSiteProto = Object.getPrototypeOf(callSite)
-    const originalCallSiteMethdos = Object.getOwnPropertyNames(callSiteProto)
+    const originalCallSiteMethods = Object.getOwnPropertyNames(callSiteProto)
 
-    originalCallSiteMethdos.forEach(method => {
+    originalCallSiteMethods.forEach(method => {
       if (method === 'constructor') return
       if (this[method]) return
       if (typeof callSiteProto[method] !== 'function') return
