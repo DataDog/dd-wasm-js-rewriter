@@ -6,6 +6,7 @@ use crate::{
     rewriter::{Config, RewrittenOutput},
     telemetry::TelemetryVerbosity,
     transform::transform_status::Status,
+    util::FileReader,
     visitor::iast::csi_methods::{CsiMethod, CsiMethods},
 };
 use anyhow::Error;
