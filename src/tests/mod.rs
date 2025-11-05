@@ -13,6 +13,7 @@ use anyhow::Error;
 use speculoos::{assert_that, prelude::BooleanAssertions};
 use std::{
     fs::File,
+    io::Read,
     path::{PathBuf},
 };
 
