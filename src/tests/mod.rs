@@ -23,6 +23,16 @@ mod string_method_test;
 mod telemetry_test;
 mod template_literal_test;
 
+struct DefaultFileReader {}
+impl FileReader<File> for DefaultFileReader {
+    fn read(&self, path: &Path) -> std::io::Result<File>
+    where
+        File: Read,
+    {
+        File::open(path)
+    }
+}
+
 fn get_test_resources_folder() -> Result<PathBuf, String> {
     std::env::current_dir()
         .map(|cwd| cwd.join("test").join("resources"))

@@ -39,14 +39,3 @@ pub trait FileReader<R: Read> {
         path.parent().map(PathBuf::from)
     }
 }
-
-#[cfg(test)]
-pub struct DefaultFileReader {}
-impl FileReader<File> for DefaultFileReader {
-    fn read(&self, path: &Path) -> std::io::Result<File>
-    where
-        File: Read,
-    {
-        File::open(path)
-    }
-}
