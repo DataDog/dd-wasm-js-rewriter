@@ -11,7 +11,10 @@ use crate::{
 };
 use anyhow::Error;
 use speculoos::{assert_that, prelude::BooleanAssertions};
-use std::path::PathBuf;
+use std::{
+    fs::File,
+    path::{PathBuf},
+};
 
 mod arrow_func_tests;
 mod binary_assignation_test;
