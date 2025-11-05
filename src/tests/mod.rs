@@ -14,7 +14,7 @@ use speculoos::{assert_that, prelude::BooleanAssertions};
 use std::{
     fs::File,
     io::Read,
-    path::{PathBuf},
+    path::{Path, PathBuf},
 };
 
 mod arrow_func_tests;
