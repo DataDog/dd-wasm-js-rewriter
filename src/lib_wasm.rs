@@ -115,7 +115,11 @@ impl RewriterConfig {
             strict: self.strict.unwrap_or(false),
             instrumentor: {
                 let orchestrion = self.orchestrion.clone();
-                orchestrion.map(|config_str| config_str.parse().unwrap())
+                orchestrion.and_then(|config_str| {
+                    serde_json::from_str::<orchestrion_js::Config>(&config_str)
+                        .ok()
+                        .map(orchestrion_js::Instrumentor::new)
+                })
             },
         }
     }

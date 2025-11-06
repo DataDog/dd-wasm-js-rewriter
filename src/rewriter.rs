@@ -197,7 +197,7 @@ pub fn rewrite_js<R: Read>(
             &mut passes,
             meta,
         )
-    })
+    }).map_err(|e| anyhow::anyhow!("Compilation error: {:?}", e))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -396,18 +396,20 @@ fn chain_source_maps(
                         let mut source_idx = None;
                         if original.has_source() {
                             let source = original.get_source().unwrap();
-                            source_idx = Some(sources.get(source).copied().unwrap_or_else(|| {
-                                let result = builder.add_source(source);
-                                sources.insert(String::from(source), result);
+                            source_idx = Some(sources.get(source.as_str()).copied().unwrap_or_else(|| {
+                                let source_str = source.to_string();
+                                let result = builder.add_source(source.clone());
+                                sources.insert(source_str, result);
                                 result
                             }));
                         }
                         let mut name_idx = None;
                         if original.has_name() {
                             let name = original.get_name().unwrap();
-                            name_idx = Some(names.get(name).copied().unwrap_or_else(|| {
-                                let result = builder.add_name(name);
-                                names.insert(String::from(name), result);
+                            name_idx = Some(names.get(name.as_str()).copied().unwrap_or_else(|| {
+                                let name_str = name.to_string();
+                                let result = builder.add_name(name.clone());
+                                names.insert(name_str, result);
                                 result
                             }));
                         }
@@ -563,5 +565,6 @@ pub fn debug_js(code: String) -> Result<RewrittenOutput> {
             transform_status: None,
             literals_result: None,
         })
-    });
+    })
+    .map_err(|e| anyhow::anyhow!("Compilation error: {:?}", e));
 }
