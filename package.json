@@ -1,7 +1,7 @@
 {
   "name": "@datadog/wasm-js-rewriter",
   "homepage": "https://github.com/DataDog/dd-wasm-js-rewriter/blob/main/README.md",
-  "version": "4.0.1",
+  "version": "5.0.0",
   "description": "Datadog instrumentation addon for Node.js",
   "main": "main.js",
   "types": "index.d.ts",
