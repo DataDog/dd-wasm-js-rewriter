@@ -2,3 +2,5 @@ samples
 test/resources/**
 index.d.ts
 wasm
+integration-test/requires/error-typescript.js
+integration-test/requires/error-typescript.ts

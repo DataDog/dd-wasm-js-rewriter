@@ -1,4 +1,8 @@
 /* eslint no-unused-expressions: 0 */
+'use strict'
+
+const childProcess = require('child_process')
+const path = require('path')
 const { isFileEdited } = require('./edited-files-cache')
 
 describe('Test stack traces', () => {
@@ -31,6 +35,17 @@ describe('Test stack traces', () => {
       const firstStackLine = error.stack.split('\n')[1]
       expect(firstStackLine).to.contain('errors.js:21:10')
       expect(isFileEdited('errors.js')).to.be.true
+    })
+  })
+
+  describe('When sourcemaps are enabled', () => {
+    it('should calculate stack traces correctly', () => {
+      const result = childProcess.execSync(
+        'node --enable-source-maps --require ./init-rewriter.js ./requires/error-typescript.js',
+        {
+          cwd: __dirname
+        }).toString()
+      expect(result).to.contain(`${path.join('requires', 'error-typescript.ts')}:2:15`)
     })
   })
 })
