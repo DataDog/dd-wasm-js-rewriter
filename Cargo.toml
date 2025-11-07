@@ -26,6 +26,7 @@ js-sys = "0.3.63"
 log = {version = "0.4", features = ["std"] }
 orchestrion-js = { git = "https://github.com/sabrenner/orchestrion-js", branch = "sabrenner/update-deps", features = ["serde"] }
 regex = "1.11.1"
+getrandom = { version = "0.3", features = ["wasm_js"] }
 
 [dev-dependencies]
 tempfile = "3.3.0"
