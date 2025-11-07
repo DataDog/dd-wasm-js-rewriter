@@ -32,6 +32,7 @@ getrandom = { version = "0.3", features = ["wasm_js"] }
 tempfile = "3.3.0"
 speculoos = "0.11.0"
 ctor = "0.1.23"
+serde_yaml = "0.9"
 
 [profile.release]
 lto = true
