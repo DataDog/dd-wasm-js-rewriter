@@ -38,7 +38,7 @@ describe('Test stack traces', () => {
     })
   })
 
-  describe.only('When sourcemaps are enabled', () => {
+  describe('When sourcemaps are enabled', () => {
     it('should calculate stack traces correctly in a rewritten file', () => {
       const result = childProcess.execSync(
         'node --enable-source-maps --require ./init-rewriter.js ./requires/error-typescript-append.js',
