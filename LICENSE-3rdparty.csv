@@ -45,6 +45,7 @@ dev,mocha-junit-reporter,MIT,Copyright (c) 2015 Michael Allen
 dev,npm-run-all,MIT,Copyright (c) 2015 Toru Nagashima
 dev,recast,MIT,Copyright (c) 2012 Ben Newman <bn@cs.stanford.edu
 dev,prettier,MIT,Copyright © James Long and contributors
+dev,serde_yaml,MIT OR Apache-2.0,Copyright (c) David Tolnay
 dev,sorcery,MIT,Copyright 2014 Rich-Harris
 dev,source-map,BSD-3-Clause,Copyright (c) 2009-2011 Mozilla Foundation and contributors
 dev,speculoos,Apache-2.0,Copyright (c) cfrancia and oknozor
