@@ -21,7 +21,8 @@ class WrappedCallSite {
         const { path, line, column } = getSourcePathAndLineFromSourceMaps(
           evalData[1],
           evalData[2],
-          evalData[3]
+          evalData[3],
+          sourceMapsEnabled
         )
 
         this.evalOrigin = evalOrigin.replace(`${evalData[1]}:${evalData[2]}:${evalData[3]}`,
@@ -32,7 +33,8 @@ class WrappedCallSite {
     const { path, line, column } = getSourcePathAndLineFromSourceMaps(
       callSite.getFileName(),
       callSite.getLineNumber(),
-      callSite.getColumnNumber()
+      callSite.getColumnNumber(),
+      sourceMapsEnabled
     )
 
     this.source = path
@@ -74,6 +76,7 @@ class WrappedCallSite {
   }
 
   getFileName () {
+    console.log('getFilename')
     return sourceMapsEnabled ? this.callSite.getFileName() : this.source
   }
 
@@ -126,6 +129,7 @@ class WrappedCallSite {
   }
 
   toString () {
+    console.log('toString')
     let callSiteString = this.callSite.toString()
 
     if (this.isEval()) {
@@ -193,7 +197,12 @@ function getPrepareStackTrace (originalPrepareStackTrace) {
             return stackFrame
           }
         }
-        const { path, line, column } = getSourcePathAndLineFromSourceMaps(filename, originalLine, originalColumn)
+        const { path, line, column } = getSourcePathAndLineFromSourceMaps(
+          filename,
+          originalLine,
+          originalColumn,
+          sourceMapsEnabled
+        )
         if (path !== filename || line !== originalLine || column !== originalColumn) {
           return stackFrame.replace(`${filename}:${originalLine}:${originalColumn}`, `${path}:${line}:${column}`)
         }

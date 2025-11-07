@@ -38,14 +38,31 @@ describe('Test stack traces', () => {
     })
   })
 
-  describe('When sourcemaps are enabled', () => {
-    it('should calculate stack traces correctly', () => {
+  describe.only('When sourcemaps are enabled', () => {
+    it('should calculate stack traces correctly in a rewritten file', () => {
       const result = childProcess.execSync(
-        'node --enable-source-maps --require ./init-rewriter.js ./requires/error-typescript.js',
+        'node --enable-source-maps --require ./init-rewriter.js ./requires/error-typescript-append.js',
         {
           cwd: __dirname
         }).toString()
-      expect(result).to.contain(`${path.join('requires', 'error-typescript.ts')}:2:15`)
+
+      expect(result).to.contain(`${path.join('requires', 'error-typescript-append.ts')}:2:13`)
+      expect(result).to.contain(`${path.join('requires', 'error-typescript-append.ts')}:5:15`)
+      expect(result).to.contain(`${path.join('requires', 'error-typescript-append.ts')}:8:17`)
+      expect(result).to.contain(`${path.join('requires', 'error-typescript-append.ts')}:12:17`)
+    })
+
+    it('should calculate stack traces correctly in a non-rewritten file', () => {
+      const result = childProcess.execSync(
+        'node --enable-source-maps --require ./init-rewriter.js ./requires/error-typescript-simple.js',
+        {
+          cwd: __dirname
+        }).toString()
+
+      expect(result).to.contain(`${path.join('requires', 'error-typescript-simple.ts')}:1:13`)
+      expect(result).to.contain(`${path.join('requires', 'error-typescript-simple.ts')}:4:15`)
+      expect(result).to.contain(`${path.join('requires', 'error-typescript-simple.ts')}:6:17`)
+      expect(result).to.contain(`${path.join('requires', 'error-typescript-simple.ts')}:9:17`)
     })
   })
 })
