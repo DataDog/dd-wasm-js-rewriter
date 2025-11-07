@@ -179,7 +179,9 @@ module.exports.EventSource = EventSource;
             file_iast_prefix_code: Vec::new(),
             strict: false,
             instrumentor: if orchestrion {
-                Some(ORCHESTRION_CONFIG.parse().unwrap())
+                serde_json::from_str::<orchestrion_js::Config>(ORCHESTRION_CONFIG)
+                    .ok()
+                    .map(orchestrion_js::Instrumentor::new)
             } else {
                 None
             },
