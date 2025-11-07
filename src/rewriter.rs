@@ -197,7 +197,7 @@ pub fn rewrite_js<R: Read>(
             &mut passes,
             meta,
         )
-    }).map_err(|e| anyhow::anyhow!("Compilation error: {:?}", e))
+    }).map_err(|e| anyhow::anyhow!("Compilation error: {e:?}"))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -308,7 +308,7 @@ fn transform_orchestrion(
     if let Some(instrumentor) = &mut config.instrumentor {
         if let (Some(name), Some(version)) = (meta.module_name, meta.module_version) {
             let file_path = meta.filename.to_str().unwrap();
-            let searchable = format!("node_modules/{}", name);
+            let searchable = format!("node_modules/{name}");
             if let Some(index) = file_path.find(&searchable) {
                 let path = &file_path[(index + searchable.len() + 1)..];
                 let path = path.into();
