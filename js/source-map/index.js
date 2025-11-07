@@ -3,6 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const LRU = require('lru-cache')
 const Module = require('module')
+const url = require('url')
 
 const { SourceMap } = require('./node_source_map')
 const SOURCE_MAP_LINE_START = '//# sourceMappingURL='
@@ -53,7 +54,9 @@ function getPathAndLine (sourceMap, filename, line, column) {
       const filePath = getFilePathFromName(filename)
       const { originalSource, originalLine, originalColumn } = sourceMap.findEntry(line - 1, column - 1)
       return {
-        path: path.join(filePath, originalSource),
+        path: originalSource?.startsWith?.('file://')
+          ? url.fileURLToPath(originalSource)
+          : path.join(filePath, originalSource),
         line: originalLine + 1,
         column: originalColumn + 1
       }
@@ -66,7 +69,7 @@ function getPathAndLine (sourceMap, filename, line, column) {
 
 function getSourcePathAndLineFromSourceMaps (filename, line, column = 0, sourceMapsEnabled = false) {
   let sourceMap = rewrittenSourceMapsCache.get(filename)
-  if (sourceMapsEnabled && !sourceMap) {
+  if (sourceMapsEnabled && !sourceMap && filename) {
     // if the sourcemaps is not in our cache, use node.js cache to find it
     sourceMap = Module.findSourceMap(filename)
   }

@@ -76,7 +76,6 @@ class WrappedCallSite {
   }
 
   getFileName () {
-    console.log('getFilename')
     return sourceMapsEnabled ? this.callSite.getFileName() : this.source
   }
 
@@ -129,7 +128,6 @@ class WrappedCallSite {
   }
 
   toString () {
-    console.log('toString')
     let callSiteString = this.callSite.toString()
 
     if (this.isEval()) {
