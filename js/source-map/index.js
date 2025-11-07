@@ -69,8 +69,8 @@ function getPathAndLine (sourceMap, filename, line, column) {
 
 function getSourcePathAndLineFromSourceMaps (filename, line, column = 0, sourceMapsEnabled = false) {
   let sourceMap = rewrittenSourceMapsCache.get(filename)
-  if (sourceMapsEnabled && !sourceMap && filename) {
-    // if the sourcemaps is not in our cache, use node.js cache to find it
+  if (filename && sourceMapsEnabled && !sourceMap) {
+    // if the sourcemaps is not in our cache, use Node.js cache to find it
     sourceMap = Module.findSourceMap(filename)
   }
   return getPathAndLine(sourceMap, filename, line, column)
