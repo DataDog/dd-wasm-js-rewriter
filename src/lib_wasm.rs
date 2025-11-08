@@ -116,7 +116,7 @@ impl RewriterConfig {
             instrumentor: {
                 let orchestrion = self.orchestrion.clone();
                 orchestrion.and_then(|config_str| {
-                    serde_json::from_str::<orchestrion_js::Config>(&config_str)
+                    serde_yml::from_str::<orchestrion_js::Config>(&config_str)
                         .ok()
                         .map(orchestrion_js::Instrumentor::new)
                 })

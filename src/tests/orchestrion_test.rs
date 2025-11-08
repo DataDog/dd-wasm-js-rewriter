@@ -179,7 +179,7 @@ module.exports.EventSource = EventSource;
             file_iast_prefix_code: Vec::new(),
             strict: false,
             instrumentor: if orchestrion {
-                match serde_yaml::from_str::<orchestrion_js::Config>(ORCHESTRION_CONFIG) {
+                match serde_yml::from_str::<orchestrion_js::Config>(ORCHESTRION_CONFIG) {
                     Ok(config) => Some(orchestrion_js::Instrumentor::new(config)),
                     Err(e) => {
                         eprintln!("Failed to parse orchestrion config: {:?}", e);
