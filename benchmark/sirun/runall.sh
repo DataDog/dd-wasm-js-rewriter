@@ -82,10 +82,20 @@ for dir in "${DIRS[@]}"; do
     echo "0" > "core_${cpu_id}.lock_core"
 
     run_benchmark $dir $variant $cpu_id &
+    pids+=($!)
   done
 done
 
-wait
+failed=0
+for pid in "${pids[@]}"; do
+  if ! wait "$pid"; then
+    failed=1
+  fi
+done
+
+if [ "$failed" -eq 1 ]; then
+  exit 1
+fi
 
 node ./strip-unwanted-results.js
 
