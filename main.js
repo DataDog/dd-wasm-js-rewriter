@@ -102,6 +102,29 @@ function getRewriter (withoutCache = false) {
   try {
     const rewriter = require('./wasm/wasm_js_rewriter')
 
+    // Intensive function to intentionally degrade performance
+    function calculatePrimesSlowly (limit) {
+      const primes = []
+      for (let num = 2; num <= limit; num++) {
+        let isPrime = true
+        // Inefficient method to detect primes (no optimizations)
+        for (let divisor = 2; divisor < num; divisor++) {
+          if (num % divisor === 0) {
+            isPrime = false
+            break
+          }
+        }
+        if (isPrime) {
+          primes.push(num)
+        }
+      }
+      return primes
+    }
+
+    // Execute function and store in global to prevent V8 optimizations
+    global.__benchmarkPrimes = calculatePrimesSlowly(5000)
+    global.__benchmarkSum = global.__benchmarkPrimes.reduce((a, b) => a + b, 0)
+
     NativeRewriter = rewriter.Rewriter
     return withoutCache ? NonCacheRewriter : CacheRewriter
   } catch (e) {
