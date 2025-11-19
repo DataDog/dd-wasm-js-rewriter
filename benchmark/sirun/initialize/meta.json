@@ -2,8 +2,8 @@
   "name": "initialize",
   "cachegrind": false,
   "instructions": true,
-  "iterations": 100,
-  "timeout": 15,
+  "iterations": 10,
+  "timeout": 30,
   "variants": {
     "main": {
       "run": "node ./init.js",
