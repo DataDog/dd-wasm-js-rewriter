@@ -63,8 +63,8 @@ run_benchmark() {
   echo "running ${dir}/${variant} in background, pinned to core ${CPU_AFFINITY}..."
 
   export SIRUN_VARIANT=$variant
-  (time node ../run-one-variant.js >> ../results.ndjson && echo "${D}/${V} finished.")
-  
+  (time node ../run-one-variant.js >> ../results.ndjson && echo "${dir}/${variant} finished.")
+
   cd ..
 
   echo "1" > "core_${cpu_id}.lock_core"
@@ -77,15 +77,25 @@ for dir in "${DIRS[@]}"; do
   variants="$(node ../get-variants.js)"
   node ../squash-affinity.js
   cd ..
-  for variant in $variants; do 
+  for variant in $variants; do
     cpu_id=$(get_next_available_core)
     echo "0" > "core_${cpu_id}.lock_core"
 
     run_benchmark $dir $variant $cpu_id &
+    pids+=($!)
   done
 done
 
-wait
+failed=0
+for pid in "${pids[@]}"; do
+  if ! wait "$pid"; then
+    failed=1
+  fi
+done
+
+if [ "$failed" -eq 1 ]; then
+  exit 1
+fi
 
 node ./strip-unwanted-results.js
 
