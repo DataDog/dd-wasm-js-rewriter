@@ -33,7 +33,7 @@
     "@typescript-eslint/parser": "^5.38.1",
     "ast-types": "^0.15.2",
     "chai": "^4.3.6",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "dotenv-cli": "^5.0.0",
     "eslint": "^7.31.0",
     "eslint-config-standard": "^16.0.3",
