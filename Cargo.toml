@@ -15,10 +15,10 @@ swc_ecma_parser = "10.0.0"
 anyhow = "1.0.81"
 fastrand = { version = "2.1.0", features = ["js"] }
 instant = "0.1"
-base64 = "0.21.0"
+base64 = "0.22.0"
 wasm-bindgen = "0.2"
 serde = { version = "1.0", features = ["derive"] }
-serde-wasm-bindgen = "0.4"
+serde-wasm-bindgen = "0.6"
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.63"
 log = {version = "0.4", features = ["std"] }
@@ -27,8 +27,8 @@ regex = "1.11.1"
 
 [dev-dependencies]
 tempfile = "3.3.0"
-speculoos = "0.11.0"
-ctor = "0.1.23"
+speculoos = "0.13.0"
+ctor = "0.6.0"
 
 [profile.release]
 lto = true
