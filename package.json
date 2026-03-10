@@ -19,7 +19,7 @@
     "url": "https://github.com/DataDog/dd-wasm-js-rewriter/issues"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "lru-cache": "^7.14.0",
     "module-details-from-path": "^1.0.3",
     "node-gyp-build": "^4.5.0"
