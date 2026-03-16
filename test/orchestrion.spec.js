@@ -104,13 +104,13 @@ describe('orchestrion', () => {
         message.asyncEnd = true
       }
     })
-    await mod.exports.fetch('https://www.example.com')
+    await mod.exports.fetch('https://www.datadoghq.com/')
     expect(eventMessage.start).to.be.true
     expect(eventMessage.end).to.be.true
     expect(eventMessage.asyncStart).to.be.true
     expect(eventMessage.asyncEnd).to.be.true
     expect(eventMessage.self).to.equal(mod.exports)
-    expect(Array.from(eventMessage.arguments)).to.deep.equal(['https://www.example.com'])
+    expect(Array.from(eventMessage.arguments)).to.deep.equal(['https://www.datadoghq.com/'])
     expect(eventMessage.result.constructor.name).to.equal('Response')
   })
 })
