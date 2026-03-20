@@ -3,7 +3,6 @@
 * This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2022 Datadog, Inc.
 **/
 use std::{
-    fs::File,
     io::Read,
     path::{Path, PathBuf},
 };
@@ -37,16 +36,5 @@ pub trait FileReader<R: Read> {
 
     fn parent(&self, path: &Path) -> Option<PathBuf> {
         path.parent().map(PathBuf::from)
-    }
-}
-
-#[allow(dead_code)]
-pub struct DefaultFileReader {}
-impl FileReader<File> for DefaultFileReader {
-    fn read(&self, path: &Path) -> std::io::Result<File>
-    where
-        File: Read,
-    {
-        File::open(path)
     }
 }

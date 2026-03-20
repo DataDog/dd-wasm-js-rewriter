@@ -6,12 +6,16 @@ use crate::{
     rewriter::{Config, RewrittenOutput},
     telemetry::TelemetryVerbosity,
     transform::transform_status::Status,
-    util::DefaultFileReader,
+    util::FileReader,
     visitor::iast::csi_methods::{CsiMethod, CsiMethods},
 };
 use anyhow::Error;
 use speculoos::{assert_that, prelude::BooleanAssertions};
-use std::path::PathBuf;
+use std::{
+    fs::File,
+    io::Read,
+    path::{Path, PathBuf},
+};
 
 mod arrow_func_tests;
 mod binary_assignation_test;
@@ -22,6 +26,16 @@ mod source_map_test;
 mod string_method_test;
 mod telemetry_test;
 mod template_literal_test;
+
+struct DefaultFileReader {}
+impl FileReader<File> for DefaultFileReader {
+    fn read(&self, path: &Path) -> std::io::Result<File>
+    where
+        File: Read,
+    {
+        File::open(path)
+    }
+}
 
 fn get_test_resources_folder() -> Result<PathBuf, String> {
     std::env::current_dir()
