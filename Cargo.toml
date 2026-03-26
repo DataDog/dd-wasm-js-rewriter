@@ -8,7 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 swc = "16.1.0"
-swc_common = "8.0.0"
+swc_common = "19.0.0"
 swc_ecma_ast = "8.0.0"
 swc_ecma_visit = "8.0.0"
 swc_ecma_parser = "10.0.0"
