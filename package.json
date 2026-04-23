@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "js-yaml": "^4.1.1",
-    "lru-cache": "^7.14.0",
+    "lru-cache": "^11.3.5",
     "module-details-from-path": "^1.0.4",
     "node-gyp-build": "^4.8.4"
   },
