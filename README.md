@@ -106,3 +106,4 @@ and then it will be possible to run the tests with
 ```
 $ npm t
 ```
+
