@@ -4,8 +4,10 @@ FROM v8builder:${V8_BRANCH}
 
 WORKDIR /build
 
-# asm tests excluded
-RUN rm -rf /build/v8/test/mjsunit/asm
+# Exclude tests unrelated to JavaScript rewriting. verify-check-false deliberately
+# aborts d8 and can be reported as a timeout in container CI.
+RUN rm -rf /build/v8/test/mjsunit/asm \
+    && rm -f /build/v8/test/mjsunit/verify-check-false.js
 
 # copy rewriter npm packages and extract them
 COPY ./datadog-wasm-js-rewriter* /build/
