@@ -61,7 +61,7 @@ describe('orchestrion', () => {
 
   afterEach(function () {
     sinon.restore()
-    fs.rmdirSync(tempDir, { recursive: true })
+    fs.rmSync(tempDir, { recursive: true, force: true })
   })
 
   it('should rewrite undici index.js file', async function () {
