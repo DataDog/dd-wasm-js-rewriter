@@ -384,6 +384,23 @@ fn();
       )
     })
 
+    it('should modify a?.trim() inside a braceless else branch', () => {
+      const js = 'if (x) fn(); else a?.trim();'
+
+      rewriteAndExpect(
+        js,
+        `{
+let __datadog_test_0, __datadog_test_1, __datadog_test_2;
+if (x) fn();
+else (__datadog_test_0 = a, __datadog_test_0 == null ? undefined : (__datadog_test_1 = __datadog_test_0, \
+__datadog_test_2 = __datadog_test_1.trim, _ddiast.trim(__datadog_test_2.call(__datadog_test_1), \
+__datadog_test_2, __datadog_test_1)));
+}`,
+        ['iast'],
+        false
+      )
+    })
+
     it('should modify a?.trim(b?.method())', () => {
       const js = 'a?.trim(b?.method())'
 
