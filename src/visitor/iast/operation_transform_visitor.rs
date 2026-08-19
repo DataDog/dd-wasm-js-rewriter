@@ -179,7 +179,7 @@ impl VisitMut for OperationTransformVisitor<'_> {
     }
 
     fn visit_mut_if_stmt(&mut self, if_stmt: &mut IfStmt) {
-        if_stmt.test.visit_mut_children_with(self);
+        if_stmt.test.visit_mut_with(self);
         if_stmt.cons.visit_mut_children_with(self);
     }
 
