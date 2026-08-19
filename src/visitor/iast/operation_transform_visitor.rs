@@ -178,11 +178,6 @@ impl VisitMut for OperationTransformVisitor<'_> {
         self.ident_provider.register_variable(ident);
     }
 
-    fn visit_mut_if_stmt(&mut self, if_stmt: &mut IfStmt) {
-        if_stmt.test.visit_mut_children_with(self);
-        if_stmt.cons.visit_mut_children_with(self);
-    }
-
     // cancel visit child blocks
     fn visit_mut_block_stmt(&mut self, _n: &mut BlockStmt) {}
 }

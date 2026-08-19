@@ -366,6 +366,60 @@ __datadog_test_2.call(__datadog_test_1), __datadog_test_2, __datadog_test_1))));
       )
     })
 
+    it('should modify a?.toLowerCase()?.includes("needle") inside an if condition', () => {
+      const js = "if (a?.toLowerCase()?.includes('needle')) { fn() }"
+
+      rewriteAndExpect(
+        js,
+        `{
+let __datadog_test_0, __datadog_test_1, __datadog_test_2;
+if ((__datadog_test_0 = a, __datadog_test_0 == null ? undefined : (__datadog_test_1 = __datadog_test_0, \
+__datadog_test_2 = __datadog_test_1.toLowerCase, _ddiast.toLowerCase(__datadog_test_2.call(__datadog_test_1), \
+__datadog_test_2, __datadog_test_1))?.includes('needle'))) {
+fn();
+}
+}`,
+        ['iast'],
+        false
+      )
+    })
+
+    it('should modify a?.trim() inside a braceless else branch', () => {
+      const js = 'if (x) fn(); else a?.trim();'
+
+      rewriteAndExpect(
+        js,
+        `{
+let __datadog_test_0, __datadog_test_1, __datadog_test_2;
+if (x) fn();
+else (__datadog_test_0 = a, __datadog_test_0 == null ? undefined : (__datadog_test_1 = __datadog_test_0, \
+__datadog_test_2 = __datadog_test_1.trim, _ddiast.trim(__datadog_test_2.call(__datadog_test_1), \
+__datadog_test_2, __datadog_test_1)));
+}`,
+        ['iast'],
+        false
+      )
+    })
+
+    it('should modify a?.trim() inside an else-if condition', () => {
+      const js = 'if (x) fn(); else if (a?.trim()) { fn2() }'
+
+      rewriteAndExpect(
+        js,
+        `{
+let __datadog_test_0, __datadog_test_1, __datadog_test_2;
+if (x) fn();
+else if ((__datadog_test_0 = a, __datadog_test_0 == null ? undefined : (__datadog_test_1 = __datadog_test_0, \
+__datadog_test_2 = __datadog_test_1.trim, _ddiast.trim(__datadog_test_2.call(__datadog_test_1), \
+__datadog_test_2, __datadog_test_1)))) {
+fn2();
+}
+}`,
+        ['iast'],
+        false
+      )
+    })
+
     it('should modify a?.trim(b?.method())', () => {
       const js = 'a?.trim(b?.method())'
 
@@ -428,7 +482,9 @@ __datadog_test_3)));
       })`,
       'const a = { method () {} }; const b = undefined; a?.method(b?.substring(0))',
       // eslint-disable-next-line no-template-curly-in-string
-      'const a = { method (p) { return p } }; const b = undefined; a?.method(`${b?.substring()}`)'
+      'const a = { method (p) { return p } }; const b = undefined; a?.method(`${b?.substring()}`)',
+      'const a = "abcd"; if (a?.substring(1)?.charCodeAt(0)) { return true } return false',
+      'const a = null; if (a?.substring(1)?.charCodeAt(0)) { return true } return false'
     ]
 
     FUNCTION_CONTENTS_TO_TEST.forEach((functionContent) => {

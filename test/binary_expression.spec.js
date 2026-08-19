@@ -323,6 +323,17 @@ __datadog_test_1, __datadog_test_0, __datadog_test_1)))) > 100) {}
     )
   })
 
+  it('does modify add inside a braceless else branch', () => {
+    const js = 'if (x) {} else result = a + b;'
+    rewriteAndExpect(
+      js,
+      `{
+        if (x) {} else result = _ddiast.plusOperator(a + b, a, b);
+      }`,
+      ['iast']
+    )
+  })
+
   it('does fail rewrite if duplicate variable name is found', () => {
     const js = 'const __datadog_test_0 = 0; const c = a + b();'
     rewriteAndExpectError(js, ['iast'])
