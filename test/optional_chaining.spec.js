@@ -401,6 +401,25 @@ __datadog_test_2, __datadog_test_1)));
       )
     })
 
+    it('should modify a?.trim() inside an else-if condition', () => {
+      const js = 'if (x) fn(); else if (a?.trim()) { fn2() }'
+
+      rewriteAndExpect(
+        js,
+        `{
+let __datadog_test_0, __datadog_test_1, __datadog_test_2;
+if (x) fn();
+else if ((__datadog_test_0 = a, __datadog_test_0 == null ? undefined : (__datadog_test_1 = __datadog_test_0, \
+__datadog_test_2 = __datadog_test_1.trim, _ddiast.trim(__datadog_test_2.call(__datadog_test_1), \
+__datadog_test_2, __datadog_test_1)))) {
+fn2();
+}
+}`,
+        ['iast'],
+        false
+      )
+    })
+
     it('should modify a?.trim(b?.method())', () => {
       const js = 'a?.trim(b?.method())'
 
