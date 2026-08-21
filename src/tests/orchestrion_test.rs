@@ -7,16 +7,16 @@ mod tests {
 
     const ORCHESTRION_CONFIG: &str = "
 version: 1
+dcModule: dc-polyfill
 instrumentations:
-  - module_name: undici
-    version_range: '>= 0.0.1'
-    file_path: index.js
-    operator: tracePromise
-    channel_name: fetch
-    function_query:
-      name: fetch
-      type: expr
-      kind: async
+  - module:
+      name: undici
+      versionRange: '>=0.0.1'
+      filePath: index.js
+    functionQuery:
+      expressionName: fetch
+      kind: Async
+    channelName: fetch
     ";
 
     const UNDICI_CODE: &str = "
@@ -179,15 +179,21 @@ module.exports.EventSource = EventSource;
             file_iast_prefix_code: Vec::new(),
             strict: false,
             instrumentor: if orchestrion {
-                Some(ORCHESTRION_CONFIG.parse().unwrap())
+                match serde_yml::from_str::<orchestrion_js::Config>(ORCHESTRION_CONFIG) {
+                    Ok(config) => Some(orchestrion_js::Instrumentor::new(config)),
+                    Err(e) => {
+                        eprintln!("Failed to parse orchestrion config: {:?}", e);
+                        None
+                    }
+                }
             } else {
                 None
             },
         };
         let passes: &[String] = if iast && orchestrion {
-            &*vec!["instrumentation".to_string(), "orchestrion".to_string()]
+            &*vec!["iast".to_string(), "orchestrion".to_string()]
         } else if iast {
-            &*vec!["instrumentation".to_string()]
+            &*vec!["iast".to_string()]
         } else if orchestrion {
             &*vec!["orchestrion".to_string()]
         } else {
