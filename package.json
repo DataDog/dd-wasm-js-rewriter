@@ -97,5 +97,12 @@
     "trailingComma": "all",
     "singleQuote": true,
     "arrowParens": "always"
+  },
+  "overrides": {
+    "js-yaml": {
+      "argparse": {
+        "sprintf-js": "^1.1.3"
+      }
+    }
   }
 }
