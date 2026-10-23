@@ -1,9 +1,9 @@
-FROM node:16-alpine@sha256:38bc06c682ae1f89f4c06a5f40f7a07ae438ca437a2a04cf773e66960b2d75bc
+FROM node:26.12.1-alpine@sha256:40cd011b55415bc894e45b02fdd5a5dfde056921b7d23a64c74f80497af48797
 
 ARG NPM_VERSION
 ENV REWRITER=datadog-wasm-js-rewriter-${NPM_VERSION}.tgz
 
-RUN apk add py3-pip make g++ curl
+RUN apk add python3 make g++ curl
 
 WORKDIR /test
 COPY ./package.json .
