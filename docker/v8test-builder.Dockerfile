@@ -1,6 +1,9 @@
 ARG V8_BRANCH="main"
 FROM node:26.12.1-bookworm@sha256:5c4012d11d9857c42713ba511fbc19645cac1706bb710d51d42b0d301dff7f88 AS v8builder
 
+# Debian bookworm marks the system Python as externally managed (PEP 668); allow the depot_tools pip install.
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
 ARG V8_BRANCH
 
 WORKDIR /build
