@@ -23,6 +23,15 @@ if (typeof _ddiast === 'undefined') (function(globals) {
     };
 }((1, eval)('this')));`
 
+const EXPECTED_PREFIX_ET = `;
+if (typeof _dderrortracking === 'undefined') (function(globals) {
+    const noop = (res)=>res;
+    globals._dderrortracking = globals._dderrortracking || {
+        record_exception: noop,
+        record_exception_callback: noop
+    };
+}((1, eval)('this')));`
+
 describe('Initialization prefix', () => {
   describe('Rewrites', () => {
     it('should not add prefix when the file is not modified', () => {
@@ -31,11 +40,34 @@ describe('Initialization prefix', () => {
       rewriteAndExpectNoTransformation(js, ['iast'], testOptions)
     })
 
-    it('should add prefix in rewritten files', () => {
+    it('should add iast prefix in rewritten files', () => {
       const js = 'a.trim();'
 
       const rewritten = rewriteAst(wrapBlock(js), ['iast'], testOptions)
 
+      expect(rewritten.startsWith(EXPECTED_PREFIX_IAST)).to.be.true
+    })
+
+    it('should add errortracking in rewritten files', () => {
+      const js = 'try { doSomething() } catch(error) { doSomething() } '
+
+      const rewritten = rewriteAst(wrapBlock(js), ['error_tracking'], testOptions)
+      expect(rewritten.startsWith(EXPECTED_PREFIX_ET)).to.be.true
+    })
+
+    it('should add two prefixes in rewritten files', () => {
+      const js = 'a.trim(); try { doSomething() } catch(error) { doSomething() } '
+
+      const rewritten = rewriteAst(wrapBlock(js), ['iast', 'error_tracking'], testOptions)
+      // we cannot check for the exact prefix as the syntax/spaces changes between ci and local
+      expect(rewritten.includes("if (typeof _dderrortracking === 'undefined') (function(globals)")).to.be.true
+      expect(rewritten.includes("if (typeof _ddiast === 'undefined') (function(globals)")).to.be.true
+    })
+
+    it('should add only prefix if pass modifies anything in rewritten files', () => {
+      const js = 'a.trim();'
+
+      const rewritten = rewriteAst(wrapBlock(js), ['iast', 'error_tracking'], testOptions)
       expect(rewritten.startsWith(EXPECTED_PREFIX_IAST)).to.be.true
     })
 
