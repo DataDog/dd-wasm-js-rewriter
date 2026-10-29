@@ -6,7 +6,7 @@
 #[cfg(test)]
 mod tests {
 
-    use speculoos::{assert_that, prelude::ContainingIntoIterAssertions, string::StrAssertions};
+    use speculoos::{assert_that, string::StrAssertions};
 
     use anyhow::Error;
 
@@ -188,9 +188,7 @@ mod tests {
         let js_file = "test.js".to_string();
         let rewritten = rewrite_js(original_code, js_file).map_err(|e| e.to_string());
         assert!(&rewritten.is_err());
-        assert_that!(&rewritten.err()).contains(
-            "Cancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
-        );
+        assert_that!(&rewritten.err().unwrap()).contains("Cancelling test.js file rewrite. Reason: Variable name duplicated");
         Ok(())
     }
 
@@ -202,9 +200,7 @@ mod tests {
         let js_file = "test.js".to_string();
         let rewritten = rewrite_js(original_code, js_file).map_err(|e| e.to_string());
         assert!(&rewritten.is_err());
-        assert_that!(&rewritten.err()).contains(
-            "Cancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
-        );
+        assert_that!(&rewritten.err().unwrap()).contains("Cancelling test.js file rewrite. Reason: Variable name duplicated");
         Ok(())
     }
 
@@ -214,9 +210,7 @@ mod tests {
         let js_file = "test.js".to_string();
         let rewritten = rewrite_js(original_code, js_file).map_err(|e| e.to_string());
         assert!(&rewritten.is_err());
-        assert_that!(&rewritten.err()).contains(
-            "Cancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
-        );
+        assert_that!(&rewritten.err().unwrap()).contains("Cancelling test.js file rewrite. Reason: Variable name duplicated");
         Ok(())
     }
 
@@ -228,9 +222,7 @@ mod tests {
         let rewritten = rewrite_js(original_code, js_file).map_err(|e| e.to_string());
 
         assert!(&rewritten.is_err());
-        assert_that!(&rewritten.err()).contains(
-            "Cancelling test.js file rewrite. Reason: Variable name duplicated".to_string(),
-        );
+        assert_that!(&rewritten.err().unwrap()).contains("Cancelling test.js file rewrite. Reason: Variable name duplicated");
         Ok(())
     }
 

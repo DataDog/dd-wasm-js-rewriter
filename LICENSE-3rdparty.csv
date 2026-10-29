@@ -3,6 +3,7 @@ require,anyhow,MIT OR Apache-2.0,Copyright (c) 2018 David Tolnay
 require,base64,MIT and Apache-2.0,Copyright (c) 2015 Alice Maz
 require,console_error_panic_hook,MIT OR Apache-2.0,Copyright (c) 2018 Nick Fitzgerald
 require,fastrand,Apache-2.0 OR MIT, Copyright 2020 Stjepan Glavina
+require,getrandom,Apache-2.0 OR MIT,Copyright (c) 2018 The Rand Project Developers
 require,instant,BSD-3-Clause,Copyright (c) 2019 Sébastien Crozet
 require,js-sys,MIT OR Apache-2.0,Copyright (c) 2014 Alex Crichton
 require,js-yaml,MIT,Copyright (c) 2011-2015 Vitaly Puzrin
@@ -12,9 +13,12 @@ require,module-details-from-path,MIT,Copyright (c) 2016 Thomas Watson Steen
 require,node-gyp-build,MIT,Copyright 2017 Mathias Buus
 require,orchestrion-js,MIT,Copyright (c) 2025 Datadog Inc.
 require,serde,MIT OR Apache-2.0,Copyright (c) Erick Tryzelaar and David Tolnay
+require,serde_json,MIT OR Apache-2.0,Copyright (c) Erick Tryzelaar and David Tolnay
+require,serde_yml,MIT OR Apache-2.0,Copyright (c) David Tolnay
 require,serde-wasm-bindgen,MIT,Copyright (c) 2019 Cloudflare Inc.
 require,swc,Apache-2.0,Copyright 강동윤
 require,swc_common,Apache-2.0,Copyright 강동윤
+require,swc_core,Apache-2.0,Copyright 강동윤
 require,swc_ecma_ast,Apache-2.0,Copyright 강동윤
 require,swc_ecma_parser,Apache-2.0,Copyright 강동윤
 require,swc_ecma_visit,Apache-2.0,Copyright 강동윤
