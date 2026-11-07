@@ -82,6 +82,17 @@ const {
 const validateObject = function () {}
 let base64Map
 
+// Each mapping takes MAPPING_FIELDS consecutive Int32Array elements: [generatedLine, generatedColumn,
+// sourceIndex, originalLine, originalColumn, nameIndex]. An Array per mapping takes several times the
+// memory, which adds up to hundreds of MB when many large files are rewritten.
+const MAPPING_FIELDS = 6
+// sourceIndex of a mapping that has no original position
+const NO_SOURCE = -1
+// sourceIndex of a mapping whose source is not in the source map's sources
+const UNKNOWN_SOURCE = -2
+// nameIndex of a mapping without a name
+const NO_NAME = -1
+
 const VLQ_BASE_SHIFT = 5
 const VLQ_BASE_MASK = (1 << 5) - 1
 const VLQ_CONTINUATION_MASK = 1 << 5
@@ -129,9 +140,9 @@ class SourceMap {
    * @param {SourceMapV3} payload
    */
   constructor (payload) {
-    this._mappings = []
     this._sources = {}
-    this._sources = {}
+    this._sourceURLs = []
+    this._names = []
     if (!base64Map) {
       const base64Digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
       base64Map = {}
@@ -139,26 +150,28 @@ class SourceMap {
         base64Map[base64Digits[i]] = i
       }
     }
-    this._payload = cloneSourceMapV3(payload)
-    this._parseMappingPayload()
+    // The payload isn't kept: it holds the encoded mappings and possibly the sources content
+    this._mappings = this._parseMappingPayload(cloneSourceMapV3(payload))
   }
 
-  _parseMappingPayload () {
-    if (this._payload.sections) {
-      this._parseSections(this._payload.sections)
+  _parseMappingPayload (payload) {
+    const mappings = []
+    if (payload.sections) {
+      this._parseSections(payload.sections, mappings)
     } else {
-      this._parseMap(this._payload, 0, 0)
+      this._parseMap(payload, 0, 0, mappings)
     }
-    ArrayPrototypeSort(this._mappings, compareSourceMapEntry)
+    return toSortedMappings(mappings)
   }
 
   /**
    * @param {Array.<SourceMapV3.Section>} sections
+   * @param {Array.<number>} mappings
    */
-  _parseSections (sections) {
+  _parseSections (sections, mappings) {
     for (let i = 0; i < sections.length; ++i) {
       const section = sections[i]
-      this._parseMap(section.map, section.offset.line, section.offset.column)
+      this._parseMap(section.map, section.offset.line, section.offset.column, mappings)
     }
   }
 
@@ -168,59 +181,78 @@ class SourceMap {
    * @return {?Array}
    */
   findEntry (lineNumber, columnNumber) {
+    const mappings = this._mappings
     let first = 0
-    let count = this._mappings.length
+    let count = mappings.length / MAPPING_FIELDS
     while (count > 1) {
       const step = count >> 1
       const middle = first + step
-      const mapping = this._mappings[middle]
-      if (lineNumber < mapping[0] || (lineNumber === mapping[0] && columnNumber < mapping[1])) {
+      const offset = middle * MAPPING_FIELDS
+      if (lineNumber < mappings[offset] || (lineNumber === mappings[offset] && columnNumber < mappings[offset + 1])) {
         count = step
       } else {
         first = middle
         count -= step
       }
     }
-    const entry = this._mappings[first]
-    if (!first && entry && (lineNumber < entry[0] || (lineNumber === entry[0] && columnNumber < entry[1]))) {
-      return {}
-    } else if (!entry) {
+    const offset = first * MAPPING_FIELDS
+    if (offset >= mappings.length) {
       return {}
     }
+    const generatedLine = mappings[offset]
+    const generatedColumn = mappings[offset + 1]
+    if (!first && (lineNumber < generatedLine || (lineNumber === generatedLine && columnNumber < generatedColumn))) {
+      return {}
+    }
+    const sourceIndex = mappings[offset + 2]
+    if (sourceIndex === NO_SOURCE) {
+      return {
+        generatedLine,
+        generatedColumn,
+        originalSource: undefined,
+        originalLine: undefined,
+        originalColumn: undefined,
+        name: undefined
+      }
+    }
+    const nameIndex = mappings[offset + 5]
     return {
-      generatedLine: entry[0],
-      generatedColumn: entry[1],
-      originalSource: entry[2],
-      originalLine: entry[3],
-      originalColumn: entry[4],
-      name: entry[5]
+      generatedLine,
+      generatedColumn,
+      originalSource: sourceIndex === UNKNOWN_SOURCE ? undefined : this._sourceURLs[sourceIndex],
+      originalLine: mappings[offset + 3],
+      originalColumn: mappings[offset + 4],
+      name: nameIndex === NO_NAME ? undefined : this._names[nameIndex]
     }
   }
 
   /**
    * @override
    */
-  _parseMap (map, lineNumber, columnNumber) {
+  _parseMap (map, lineNumber, columnNumber, mappings) {
     let sourceIndex = 0
     let sourceLineNumber = 0
     let sourceColumnNumber = 0
     let nameIndex = 0
 
-    const sources = []
-    const originalToCanonicalURLMap = {}
-    for (let i = 0; i < map.sources.length; ++i) {
+    const firstSourceURLIndex = this._sourceURLs.length
+    const sourceCount = map.sources.length
+    for (let i = 0; i < sourceCount; ++i) {
       const url = map.sources[i]
-      originalToCanonicalURLMap[url] = url
-      ArrayPrototypePush(sources, url)
+      ArrayPrototypePush(this._sourceURLs, url)
       this._sources[url] = true
+    }
+    const getSourceURLIndex = (index) =>
+      index >= 0 && index < sourceCount ? firstSourceURLIndex + index : UNKNOWN_SOURCE
 
-      if (map.sourcesContent && map.sourcesContent[i]) {
-        this._sources[url] = map.sourcesContent[i]
-      }
+    const firstNameIndex = this._names.length
+    const nameCount = map.names ? map.names.length : 0
+    for (let i = 0; i < nameCount; ++i) {
+      ArrayPrototypePush(this._names, map.names[i])
     }
 
     const stringCharIterator = new StringCharIterator(map.mappings)
-    let sourceURL = sources[sourceIndex]
+    let sourceURLIndex = getSourceURLIndex(sourceIndex)
     while (true) {
       if (stringCharIterator.peek() === ',') {
         stringCharIterator.next()
@@ -237,34 +269,81 @@ class SourceMap {
 
       columnNumber += decodeVLQ(stringCharIterator)
       if (isSeparator(stringCharIterator.peek())) {
-        ArrayPrototypePush(this._mappings, [lineNumber, columnNumber])
+        ArrayPrototypePush(mappings, lineNumber, columnNumber, NO_SOURCE, 0, 0, NO_NAME)
         continue
       }
 
       const sourceIndexDelta = decodeVLQ(stringCharIterator)
       if (sourceIndexDelta) {
         sourceIndex += sourceIndexDelta
-        sourceURL = sources[sourceIndex]
+        sourceURLIndex = getSourceURLIndex(sourceIndex)
       }
       sourceLineNumber += decodeVLQ(stringCharIterator)
       sourceColumnNumber += decodeVLQ(stringCharIterator)
 
-      let name
+      let mappingNameIndex = NO_NAME
       if (!isSeparator(stringCharIterator.peek())) {
         nameIndex += decodeVLQ(stringCharIterator)
-        name = map.names ? map.names[nameIndex] : undefined
+        if (nameIndex >= 0 && nameIndex < nameCount) {
+          mappingNameIndex = firstNameIndex + nameIndex
+        }
       }
 
-      ArrayPrototypePush(this._mappings, [
+      ArrayPrototypePush(
+        mappings,
         lineNumber,
         columnNumber,
-        sourceURL,
+        sourceURLIndex,
         sourceLineNumber,
         sourceColumnNumber,
-        name
-      ])
+        mappingNameIndex
+      )
     }
   }
+}
+
+/**
+ * @param {Array.<number>} mappings MAPPING_FIELDS numbers per mapping
+ * @param {number} index1 index of a mapping
+ * @param {number} index2 index of another mapping
+ * @return {number}
+ */
+function compareMappings (mappings, index1, index2) {
+  const offset1 = index1 * MAPPING_FIELDS
+  const offset2 = index2 * MAPPING_FIELDS
+  if (mappings[offset1] !== mappings[offset2]) {
+    return mappings[offset1] - mappings[offset2]
+  }
+  return mappings[offset1 + 1] - mappings[offset2 + 1]
+}
+
+/**
+ * @param {Array.<number>} mappings MAPPING_FIELDS numbers per mapping
+ * @return {Int32Array} the mappings sorted by generated position, keeping the order of equal positions
+ */
+function toSortedMappings (mappings) {
+  const count = mappings.length / MAPPING_FIELDS
+  let sorted = true
+  for (let i = 1; i < count && sorted; i++) {
+    sorted = compareMappings(mappings, i - 1, i) <= 0
+  }
+  if (sorted) {
+    return Int32Array.from(mappings)
+  }
+
+  const order = []
+  for (let i = 0; i < count; i++) {
+    ArrayPrototypePush(order, i)
+  }
+  ArrayPrototypeSort(order, (index1, index2) => compareMappings(mappings, index1, index2) || index1 - index2)
+  const result = new Int32Array(mappings.length)
+  for (let i = 0; i < count; i++) {
+    const offset = order[i] * MAPPING_FIELDS
+    for (let field = 0; field < MAPPING_FIELDS; field++) {
+      result[i * MAPPING_FIELDS + field] = mappings[offset + field]
+    }
+  }
+  return result
 }
 
 /**
@@ -320,21 +399,6 @@ function cloneSourceMapV3 (payload) {
     }
   }
   return payload
-}
-
-/**
- * @param {Array} entry1 source map entry [lineNumber, columnNumber, sourceURL,
- *  sourceLineNumber, sourceColumnNumber]
- * @param {Array} entry2 source map entry.
- * @return {number}
- */
-function compareSourceMapEntry (entry1, entry2) {
-  const { 0: lineNumber1, 1: columnNumber1 } = entry1
-  const { 0: lineNumber2, 1: columnNumber2 } = entry2
-  if (lineNumber1 !== lineNumber2) {
-    return lineNumber1 - lineNumber2
-  }
-  return columnNumber1 - columnNumber2
 }
 
 module.exports = {
