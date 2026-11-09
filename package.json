@@ -19,13 +19,13 @@
     "url": "https://github.com/DataDog/dd-wasm-js-rewriter/issues"
   },
   "dependencies": {
-    "js-yaml": "^4.3.1",
+    "js-yaml": "^4.3.2",
     "lru-cache": "^7.14.0",
     "module-details-from-path": "^1.0.4",
     "node-gyp-build": "^4.8.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.13",
+    "@babel/core": "^7.29.13",
     "@babel/parser": "^7.20.15",
     "@babel/types": "^7.18.13",
     "@swc-node/register": "^1.5.8",
@@ -54,7 +54,7 @@
     "sorcery": "^0.10.0",
     "source-map": "^0.7.3",
     "tap-junit": "^5.0.1",
-    "tmp": "^0.2.5",
+    "tmp": "^0.2.7",
     "typescript": "^4.9.5"
   },
   "engines": {
@@ -97,5 +97,154 @@
     "trailingComma": "all",
     "singleQuote": true,
     "arrowParens": "always"
+  },
+  "overrides": {
+    "@babel/core": {
+      "@babel/helper-compilation-targets": {
+        "browserslist": {
+          "baseline-browser-mapping": "^2.11.35",
+          ".": "^4.28.9"
+        }
+      }
+    },
+    "sinon": {
+      "diff": "^5.2.2"
+    },
+    "eslint": {
+      "file-entry-cache": {
+        "flat-cache": {
+          "flatted": "^3.4.4",
+          "rimraf": {
+            "glob": {
+              "minimatch": {
+                "brace-expansion": "^1.1.21"
+              }
+            }
+          }
+        }
+      },
+      "js-yaml": "^4.3.2",
+      "@eslint/eslintrc": {
+        "js-yaml": "^4.3.2",
+        "minimatch": {
+          "brace-expansion": "^1.1.21"
+        }
+      },
+      "@humanwhocodes/config-array": {
+        "minimatch": {
+          "brace-expansion": "^1.1.21"
+        }
+      },
+      "minimatch": {
+        "brace-expansion": "^1.1.21"
+      },
+      "table": {
+        "ajv": {
+          "fast-uri": "^3.1.9"
+        }
+      },
+      "optionator": {
+        "word-wrap": "^1.2.5"
+      }
+    },
+    "tap-junit": {
+      "xmlbuilder2": {
+        "js-yaml": "^4.3.2"
+      },
+      "tap-parser": {
+        "tap-yaml": {
+          "yaml": "^1.10.3"
+        }
+      }
+    },
+    "npm-run-all": {
+      "shell-quote": "^1.12.0",
+      "minimatch": {
+        "brace-expansion": "^1.1.21"
+      }
+    },
+    "eslint-plugin-import": {
+      "minimatch": {
+        "brace-expansion": "^1.1.21"
+      }
+    },
+    "eslint-plugin-node": {
+      "minimatch": {
+        "brace-expansion": "^1.1.21"
+      }
+    },
+    "sorcery": {
+      "sander": {
+        "rimraf": {
+          "glob": {
+            "minimatch": {
+              "brace-expansion": "^1.1.21"
+            }
+          }
+        }
+      }
+    },
+    "mocha": {
+      "glob": {
+        "minimatch": {
+          "brace-expansion": "^2.1.7"
+        }
+      },
+      "minimatch": {
+        "brace-expansion": "^2.1.7"
+      }
+    },
+    "@typescript-eslint/eslint-plugin": {
+      "@typescript-eslint/type-utils": {
+        "@typescript-eslint/typescript-estree": {
+          "globby": {
+            "fast-glob": {
+              "micromatch": {
+                "picomatch": "^2.3.2"
+              }
+            }
+          }
+        },
+        "@typescript-eslint/utils": {
+          "@typescript-eslint/typescript-estree": {
+            "globby": {
+              "fast-glob": {
+                "micromatch": {
+                  "picomatch": "^2.3.2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "@typescript-eslint/utils": {
+        "@typescript-eslint/typescript-estree": {
+          "globby": {
+            "fast-glob": {
+              "micromatch": {
+                "picomatch": "^2.3.2"
+              }
+            }
+          }
+        }
+      }
+    },
+    "@typescript-eslint/parser": {
+      "@typescript-eslint/typescript-estree": {
+        "globby": {
+          "fast-glob": {
+            "micromatch": {
+              "picomatch": "^2.3.2"
+            }
+          }
+        }
+      }
+    },
+    "lint-staged": {
+      "micromatch": {
+        "picomatch": "^2.3.2"
+      },
+      "yaml": "^1.10.3"
+    }
   }
 }
